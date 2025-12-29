@@ -21,7 +21,7 @@ echo   - src\**\bin\
 echo   - src\**\obj\
 if "%DO_NUGET%"=="1" (
   echo.
-  echo NuGet caches that will be cleared (outside repo):
+  echo NuGet caches that will be cleared [outside repo]:
   echo   - dotnet nuget locals all --clear
 )
 echo ============================================================
