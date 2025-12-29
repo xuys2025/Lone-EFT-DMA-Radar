@@ -1,3 +1,24 @@
+# Lone EFT DMA Radar（汉化版）
+<img width="512" height="512" alt="image" src="https://github.com/user-attachments/assets/dc52d50b-66dd-4a9d-bbf2-c7d9b8c24aba" />
+
+这是基于上游项目的**中文汉化版本**（UI 文本与运行时翻译文件）。
+
+- 上游原项目：<https://github.com/lone-dma/Lone-EFT-DMA-Radar>
+- 本分支目标：尽量不改动上游逻辑，只做本地化接入，便于持续同步更新。
+
+## 语言切换
+在程序内：`Settings → General → Language` 可在 **English / Chinese** 间切换，并会写入配置（下次启动自动生效）。
+
+## 翻译文件
+程序会在首次启动时自动生成默认中文翻译文件：
+
+- `%AppData%\Lone-EFT-DMA\lang\zh-CN.json`
+
+你也可以直接编辑该 JSON，重启后生效。
+
+---
+
+# Original README (English)
 # Lone EFT DMA Radar
 <img width="512" height="512" alt="image" src="https://github.com/user-attachments/assets/dc52d50b-66dd-4a9d-bbf2-c7d9b8c24aba" />
 
