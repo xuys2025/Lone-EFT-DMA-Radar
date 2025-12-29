@@ -27,6 +27,7 @@ SOFTWARE.
 */
 
 using ImGuiNET;
+using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.UI.Skia;
 
 namespace LoneEftDmaRadar.UI.ColorPicker
@@ -111,7 +112,7 @@ namespace LoneEftDmaRadar.UI.ColorPicker
         public static void Draw()
         {
             bool isOpen = IsOpen;
-            if (!ImGui.Begin("Color Picker", ref isOpen, ImGuiWindowFlags.AlwaysAutoResize))
+            if (!ImGui.Begin(Loc.Title("Color Picker"), ref isOpen, ImGuiWindowFlags.AlwaysAutoResize))
             {
                 IsOpen = isOpen;
                 ImGui.End();
@@ -119,7 +120,7 @@ namespace LoneEftDmaRadar.UI.ColorPicker
             }
             IsOpen = isOpen;
 
-            ImGui.Text("Select a color option to edit:");
+            ImGui.Text(Loc.T("Select a color option to edit:"));
 
             // Color options list
             if (ImGui.BeginListBox("##ColorOptions", new Vector2(250, 300)))
@@ -145,14 +146,14 @@ namespace LoneEftDmaRadar.UI.ColorPicker
                 ImGui.EndListBox();
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Select a UI element to customize its color");
+                ImGui.SetTooltip(Loc.T("Select a UI element to customize its color"));
 
             ImGui.Separator();
 
             // Color editor
             if (_selectedOption.HasValue)
             {
-                ImGui.Text($"Editing: {GetFriendlyName(_selectedOption.Value)}");
+                ImGui.Text(string.Format(Loc.T("Editing: {0}"), GetFriendlyName(_selectedOption.Value)));
 
                 // Color picker
                 if (ImGui.ColorPicker3("##ColorPicker", ref _editingColor))
@@ -162,7 +163,7 @@ namespace LoneEftDmaRadar.UI.ColorPicker
 
                 // Hex input
                 ImGui.SetNextItemWidth(100);
-                if (ImGui.InputText("Hex", ref _hexInput, 10))
+                if (ImGui.InputText(Loc.WithId("Hex##ColorHex"), ref _hexInput, 10))
                 {
                     if (TryParseHex(_hexInput, out var parsed))
                     {
@@ -170,24 +171,24 @@ namespace LoneEftDmaRadar.UI.ColorPicker
                     }
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Enter color as hex code (e.g., #FF0000)");
+                    ImGui.SetTooltip(Loc.T("Enter color as hex code (e.g., #FF0000)"));
 
                 ImGui.Spacing();
 
-                if (ImGui.Button("Apply"))
+                if (ImGui.Button(Loc.WithId("Apply##ApplyColor")))
                 {
                     ApplyColor(_selectedOption.Value, _editingColor);
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Apply the selected color");
+                    ImGui.SetTooltip(Loc.T("Apply the selected color"));
                 ImGui.SameLine();
-                if (ImGui.Button("Reset to Default"))
+                if (ImGui.Button(Loc.WithId("Reset to Default##ResetColor")))
                 {
                     _editingColor = GetDefaultColor(_selectedOption.Value);
                     _hexInput = ColorToHex(_editingColor);
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Reset to the default color");
+                    ImGui.SetTooltip(Loc.T("Reset to the default color"));
             }
 
             ImGui.End();
@@ -197,26 +198,26 @@ namespace LoneEftDmaRadar.UI.ColorPicker
         {
             return option switch
             {
-                ColorPickerOption.LocalPlayer => "Local Player",
-                ColorPickerOption.FriendlyPlayer => "Teammate",
-                ColorPickerOption.PMCPlayer => "PMC (Enemy)",
-                ColorPickerOption.ScavPlayer => "Scav",
-                ColorPickerOption.HumanScavPlayer => "Player Scav",
-                ColorPickerOption.BossPlayer => "Boss",
-                ColorPickerOption.RaiderPlayer => "Raider/Guard",
-                ColorPickerOption.FocusedPlayer => "Focused",
-                ColorPickerOption.RegularLoot => "Regular Loot",
-                ColorPickerOption.ValuableLoot => "Valuable Loot",
-                ColorPickerOption.WishlistLoot => "Wishlist Loot",
-                ColorPickerOption.ContainerLoot => "Container Loot",
-                ColorPickerOption.MedsFilterLoot => "Meds",
-                ColorPickerOption.FoodFilterLoot => "Food",
-                ColorPickerOption.BackpacksFilterLoot => "Backpacks",
-                ColorPickerOption.QuestHelperItems => "Quest Items",
-                ColorPickerOption.QuestHelperZones => "Quest Zones",
-                ColorPickerOption.Corpse => "Corpse",
-                ColorPickerOption.DeathMarker => "Death Marker",
-                ColorPickerOption.Explosives => "Explosives",
+                ColorPickerOption.LocalPlayer => Loc.T("Local Player"),
+                ColorPickerOption.FriendlyPlayer => Loc.T("Teammate"),
+                ColorPickerOption.PMCPlayer => Loc.T("PMC (Enemy)"),
+                ColorPickerOption.ScavPlayer => Loc.T("Scav"),
+                ColorPickerOption.HumanScavPlayer => Loc.T("Player Scav"),
+                ColorPickerOption.BossPlayer => Loc.T("Boss"),
+                ColorPickerOption.RaiderPlayer => Loc.T("Raider/Guard"),
+                ColorPickerOption.FocusedPlayer => Loc.T("Focused"),
+                ColorPickerOption.RegularLoot => Loc.T("Regular Loot"),
+                ColorPickerOption.ValuableLoot => Loc.T("Valuable Loot"),
+                ColorPickerOption.WishlistLoot => Loc.T("Wishlist Loot"),
+                ColorPickerOption.ContainerLoot => Loc.T("Container Loot"),
+                ColorPickerOption.MedsFilterLoot => Loc.T("Meds"),
+                ColorPickerOption.FoodFilterLoot => Loc.T("Food"),
+                ColorPickerOption.BackpacksFilterLoot => Loc.T("Backpacks"),
+                ColorPickerOption.QuestHelperItems => Loc.T("Quest Items"),
+                ColorPickerOption.QuestHelperZones => Loc.T("Quest Zones"),
+                ColorPickerOption.Corpse => Loc.T("Corpse"),
+                ColorPickerOption.DeathMarker => Loc.T("Death Marker"),
+                ColorPickerOption.Explosives => Loc.T("Explosives"),
                 _ => option.ToString()
             };
         }

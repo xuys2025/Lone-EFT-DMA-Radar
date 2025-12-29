@@ -27,6 +27,7 @@ SOFTWARE.
 */
 
 using ImGuiNET;
+using LoneEftDmaRadar.UI.Localization;
 using Silk.NET.Input;
 using Silk.NET.Maths;
 using Silk.NET.OpenGL;
@@ -167,13 +168,6 @@ namespace LoneEftDmaRadar.UI.Misc
             _input?.Dispose();
             _input = null;
 
-            // Destroy the ImGui context we created
-            var ctx = ImGui.GetCurrentContext();
-            if (ctx != IntPtr.Zero)
-            {
-                ImGui.DestroyContext(ctx);
-            }
-
             _window.Close();
             _window.Reset();
             _window.Dispose();
@@ -189,13 +183,11 @@ namespace LoneEftDmaRadar.UI.Misc
                 EnableDarkMode(win32.Hwnd);
             }
 
-            ImGui.CreateContext();
             _input = _window.CreateInput();
-            _imgui = new ImGuiController(
-                gl: _gl,
-                view: _window,
-                input: _input
-            );
+            _imgui = new ImGuiController(_gl, _window, _input, () =>
+            {
+                ImGuiFonts.TryUseChineseFont();
+            });
 
             ConfigureStyle();
         }

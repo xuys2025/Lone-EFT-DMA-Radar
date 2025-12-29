@@ -28,6 +28,7 @@ SOFTWARE.
 
 using ImGuiNET;
 using LoneEftDmaRadar.UI.Hotkeys.Internal;
+using LoneEftDmaRadar.UI.Localization;
 using VmmSharpEx.Extensions.Input;
 
 namespace LoneEftDmaRadar.UI.Hotkeys
@@ -92,7 +93,7 @@ namespace LoneEftDmaRadar.UI.Hotkeys
             bool isOpen = IsOpen;
 
             ImGui.SetNextWindowSize(new Vector2(550, 450), ImGuiCond.FirstUseEver);
-            if (!ImGui.Begin("Hotkey Manager", ref isOpen))
+            if (!ImGui.Begin(Loc.Title("Hotkey Manager"), ref isOpen))
             {
                 IsOpen = isOpen;
                 ImGui.End();
@@ -108,7 +109,7 @@ namespace LoneEftDmaRadar.UI.Hotkeys
             }
 
             // Current Bindings Section
-            ImGui.Text("Current Hotkey Bindings:");
+            ImGui.Text(Loc.T("Current Hotkey Bindings:"));
             ImGui.Separator();
 
             DrawCurrentBindingsTable();
@@ -118,7 +119,7 @@ namespace LoneEftDmaRadar.UI.Hotkeys
             ImGui.Spacing();
 
             // Add New Binding Section
-            ImGui.Text("Add New Binding:");
+            ImGui.Text(Loc.T("Add New Binding:"));
 
             DrawAddBindingSection();
 
@@ -138,8 +139,8 @@ namespace LoneEftDmaRadar.UI.Hotkeys
                 ImGuiTableFlags.Borders | ImGuiTableFlags.Resizable | ImGuiTableFlags.ScrollY | ImGuiTableFlags.RowBg,
                 new Vector2(0, 250)))
             {
-                ImGui.TableSetupColumn("Action", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("Key", ImGuiTableColumnFlags.WidthFixed, 120);
+                ImGui.TableSetupColumn(Loc.T("Action"), ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn(Loc.T("Key"), ImGuiTableColumnFlags.WidthFixed, 120);
                 ImGui.TableSetupColumn("##Remove", ImGuiTableColumnFlags.WidthFixed, 60);
                 ImGui.TableHeadersRow();
 
@@ -161,7 +162,7 @@ namespace LoneEftDmaRadar.UI.Hotkeys
                     }
                     else
                     {
-                        ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1f), "(Not Set)");
+                        ImGui.TextColored(new Vector4(0.5f, 0.5f, 0.5f, 1f), Loc.T("(Not Set)"));
                     }
 
                     // Remove button
@@ -169,7 +170,7 @@ namespace LoneEftDmaRadar.UI.Hotkeys
                     if (currentKey.HasValue)
                     {
                         ImGui.PushID($"remove_{controller.Name}");
-                        if (ImGui.SmallButton("Remove"))
+                        if (ImGui.SmallButton(Loc.T("Remove")))
                         {
                             _keyToRemove = currentKey.Value;
                         }
@@ -185,29 +186,29 @@ namespace LoneEftDmaRadar.UI.Hotkeys
         {
             if (_actionNames is null || _actionNames.Length == 0)
             {
-                ImGui.TextColored(new Vector4(1f, 0.5f, 0.5f, 1f), "No actions registered yet.");
+                ImGui.TextColored(new Vector4(1f, 0.5f, 0.5f, 1f), Loc.T("No actions registered yet."));
                 return;
             }
 
             // Action dropdown
             ImGui.SetNextItemWidth(250);
-            if (ImGui.Combo("Action", ref _selectedActionIndex, _actionNames, _actionNames.Length))
+            if (ImGui.Combo(Loc.WithId("Action##HotkeyAction"), ref _selectedActionIndex, _actionNames, _actionNames.Length))
             {
                 // Selection changed
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Select the action to bind");
+                ImGui.SetTooltip(Loc.T("Select the action to bind"));
 
             ImGui.SameLine();
 
             // Key dropdown
             ImGui.SetNextItemWidth(150);
-            if (ImGui.Combo("Key", ref _selectedKeyIndex, _keyNames, _keyNames.Length))
+            if (ImGui.Combo(Loc.WithId("Key##HotkeyKey"), ref _selectedKeyIndex, _keyNames, _keyNames.Length))
             {
                 // Selection changed
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Select the key to bind");
+                ImGui.SetTooltip(Loc.T("Select the key to bind"));
 
             ImGui.SameLine();
 
@@ -218,7 +219,7 @@ namespace LoneEftDmaRadar.UI.Hotkeys
             if (!canAdd)
                 ImGui.BeginDisabled();
 
-            if (ImGui.Button("Add"))
+            if (ImGui.Button(Loc.WithId("Add##AddHotkey")))
             {
                 if (canAdd)
                 {
@@ -248,15 +249,15 @@ namespace LoneEftDmaRadar.UI.Hotkeys
                 }
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Add the hotkey binding");
+                ImGui.SetTooltip(Loc.T("Add the hotkey binding"));
 
             if (!canAdd)
                 ImGui.EndDisabled();
 
             // Help text
             ImGui.Spacing();
-            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "Tip: Select an action and key, then click Add to bind.");
-            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "Adding a binding will replace any existing binding for that action or key.");
+            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), Loc.T("Tip: Select an action and key, then click Add to bind."));
+            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), Loc.T("Adding a binding will replace any existing binding for that action or key."));
         }
 
         private static Win32VirtualKey? GetCurrentHotkeyKey(string actionName)

@@ -31,6 +31,7 @@ using LoneEftDmaRadar.Misc.JSON;
 using LoneEftDmaRadar.Tarkov;
 using LoneEftDmaRadar.UI.ColorPicker;
 using LoneEftDmaRadar.UI.Hotkeys;
+using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.UI.Misc;
 using LoneEftDmaRadar.UI.Skia;
 
@@ -78,7 +79,7 @@ namespace LoneEftDmaRadar.UI.Panels
         public static void Draw()
         {
             bool isOpen = _isOpen;
-            if (!ImGui.Begin("Settings", ref isOpen, ImGuiWindowFlags.AlwaysAutoResize))
+            if (!ImGui.Begin(Loc.Title("Settings"), ref isOpen, ImGuiWindowFlags.AlwaysAutoResize))
             {
                 _isOpen = isOpen;
                 ImGui.End();
@@ -103,131 +104,146 @@ namespace LoneEftDmaRadar.UI.Panels
 
         private static void DrawGeneralTab()
         {
-            if (ImGui.BeginTabItem("General"))
+            if (ImGui.BeginTabItem(Loc.Title("General")))
             {
-                ImGui.SeparatorText("Tools");
+                ImGui.SeparatorText(Loc.T("Language"));
+                int langIndex = string.Equals(Config.UI.Language ?? string.Empty, "zh-CN", StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+                string[] langItems =
+                [
+                    Loc.T("English"),
+                    Loc.T("Chinese")
+                ];
+                if (ImGui.Combo(Loc.WithId("Language##uiLang"), ref langIndex, langItems, langItems.Length))
+                {
+                    Config.UI.Language = langIndex == 1 ? "zh-CN" : "en";
+                    Loc.SetLanguage(Config.UI.Language ?? string.Empty);
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.T("Switch UI language between English and Chinese"));
 
-                if (ImGui.Button("Hotkey Manager"))
+                ImGui.SeparatorText(Loc.T("Tools"));
+
+                if (ImGui.Button(Loc.T("Hotkey Manager")))
                 {
                     HotkeyManagerPanel.IsOpen = true;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Configure keyboard hotkeys for radar functions");
+                    ImGui.SetTooltip(Loc.T("Configure keyboard hotkeys for radar functions"));
                 ImGui.SameLine();
-                if (ImGui.Button("Color Picker"))
+                if (ImGui.Button(Loc.T("Color Picker")))
                 {
                     ColorPickerPanel.IsOpen = true;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Customize colors for players, loot, and UI elements");
+                    ImGui.SetTooltip(Loc.T("Customize colors for players, loot, and UI elements"));
                 ImGui.SameLine();
-                if (ImGui.Button("Map Setup Helper##btn"))
+                if (ImGui.Button(Loc.WithId("Map Setup Helper##btn")))
                 {
                     MapSetupHelperPanel.IsOpen = true;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Adjust map calibration settings (X, Y, Scale)");
+                    ImGui.SetTooltip(Loc.T("Adjust map calibration settings (X, Y, Scale)"));
 
                 ImGui.Separator();
 
-                if (ImGui.Button("Restart Radar"))
+                if (ImGui.Button(Loc.T("Restart Radar")))
                 {
                     Memory.RestartRadar();
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Restart the radar memory reader");
+                    ImGui.SetTooltip(Loc.T("Restart the radar memory reader"));
                 ImGui.SameLine();
-                if (ImGui.Button("Backup Config"))
+                if (ImGui.Button(Loc.T("Backup Config")))
                 {
                     BackupConfig();
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Create a backup of your current configuration");
+                    ImGui.SetTooltip(Loc.T("Create a backup of your current configuration"));
                 ImGui.SameLine();
-                if (ImGui.Button("Open Config Folder"))
+                if (ImGui.Button(Loc.T("Open Config Folder")))
                 {
                     OpenConfigFolder();
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Open the folder containing configuration files");
+                    ImGui.SetTooltip(Loc.T("Open the folder containing configuration files"));
 
-                ImGui.SeparatorText("Display Settings");
+                ImGui.SeparatorText(Loc.T("Display Settings"));
 
                 // UI Scale
                 float uiScale = Config.UI.UIScale;
-                if (ImGui.SliderFloat("UI Scale", ref uiScale, 0.5f, 2.0f, "%.1f"))
+                if (ImGui.SliderFloat(Loc.T("UI Scale"), ref uiScale, 0.5f, 2.0f, "%.1f"))
                 {
                     Config.UI.UIScale = uiScale;
                     UpdateScaleValues(uiScale);
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Scale UI elements (text, icons, widgets)");
+                    ImGui.SetTooltip(Loc.T("Scale UI elements (text, icons, widgets)"));
 
                 // Zoom
                 int zoom = Config.UI.Zoom;
-                if (ImGui.SliderInt("Zoom (F1/F2)", ref zoom, 1, 200))
+                if (ImGui.SliderInt(Loc.T("Zoom (F1/F2)"), ref zoom, 1, 200))
                 {
                     Config.UI.Zoom = zoom;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Map zoom level (lower = more zoomed in)");
+                    ImGui.SetTooltip(Loc.T("Map zoom level (lower = more zoomed in)"));
 
                 // Aimline Length
                 int aimlineLength = Config.UI.AimLineLength;
-                if (ImGui.SliderInt("Aimline Length", ref aimlineLength, 0, 1500))
+                if (ImGui.SliderInt(Loc.T("Aimline Length"), ref aimlineLength, 0, 1500))
                 {
                     Config.UI.AimLineLength = aimlineLength;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Length of player aim direction lines");
+                    ImGui.SetTooltip(Loc.T("Length of player aim direction lines"));
 
                 // Max Distance (snaps to nearest 25)
                 int maxDistanceRaw = (int)Config.UI.MaxDistance;
                 int maxDistance = (int)(MathF.Round(maxDistanceRaw / 25f) * 25);
-                if (ImGui.SliderInt("Max Distance", ref maxDistance, 50, 1500, "%d"))
+                if (ImGui.SliderInt(Loc.T("Max Distance"), ref maxDistance, 50, 1500, "%d"))
                 {
                     maxDistance = (int)(MathF.Round(maxDistance / 25f) * 25);
                     maxDistance = Math.Clamp(maxDistance, 50, 1500);
                     Config.UI.MaxDistance = maxDistance;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Maximum distance to render targets in aimview");
+                    ImGui.SetTooltip(Loc.T("Maximum distance to render targets in aimview"));
 
-                ImGui.SeparatorText("Widgets");
+                ImGui.SeparatorText(Loc.T("Widgets"));
 
                 bool aimviewWidget = Config.AimviewWidget.Enabled;
-                if (ImGui.Checkbox("Aimview Widget", ref aimviewWidget))
+                if (ImGui.Checkbox(Loc.T("Aimview Widget"), ref aimviewWidget))
                 {
                     Config.AimviewWidget.Enabled = aimviewWidget;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("3D view showing players in your field of view");
+                    ImGui.SetTooltip(Loc.T("3D view showing players in your field of view"));
 
                 bool infoWidget = Config.InfoWidget.Enabled;
-                if (ImGui.Checkbox("Player Info Widget", ref infoWidget))
+                if (ImGui.Checkbox(Loc.T("Player Info Widget"), ref infoWidget))
                 {
                     Config.InfoWidget.Enabled = infoWidget;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Displays a list of nearby players with details");
+                    ImGui.SetTooltip(Loc.T("Displays a list of nearby players with details"));
 
-                ImGui.SeparatorText("Visibility");
+                ImGui.SeparatorText(Loc.T("Visibility"));
 
                 bool showExfils = Config.UI.ShowExfils;
-                if (ImGui.Checkbox("Show Exfils", ref showExfils))
+                if (ImGui.Checkbox(Loc.T("Show Exfils"), ref showExfils))
                 {
                     Config.UI.ShowExfils = showExfils;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Show extraction points on the map");
+                    ImGui.SetTooltip(Loc.T("Show extraction points on the map"));
 
                 bool showHazards = Config.UI.ShowHazards;
-                if (ImGui.Checkbox("Show Hazards", ref showHazards))
+                if (ImGui.Checkbox(Loc.T("Show Hazards"), ref showHazards))
                 {
                     Config.UI.ShowHazards = showHazards;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Show mines, sniper zones, and other hazards");
+                    ImGui.SetTooltip(Loc.T("Show mines, sniper zones, and other hazards"));
 
                 ImGui.EndTabItem();
             }
@@ -235,43 +251,43 @@ namespace LoneEftDmaRadar.UI.Panels
 
         private static void DrawPlayersTab()
         {
-            if (ImGui.BeginTabItem("Players"))
+            if (ImGui.BeginTabItem(Loc.Title("Players")))
             {
-                ImGui.SeparatorText("Player Display");
+                ImGui.SeparatorText(Loc.T("Player Display"));
 
                 bool teammateAimlines = Config.UI.TeammateAimlines;
-                if (ImGui.Checkbox("Teammate Aimlines", ref teammateAimlines))
+                if (ImGui.Checkbox(Loc.T("Teammate Aimlines"), ref teammateAimlines))
                 {
                     Config.UI.TeammateAimlines = teammateAimlines;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Show aim direction lines for teammates");
+                    ImGui.SetTooltip(Loc.T("Show aim direction lines for teammates"));
 
                 bool aiAimlines = Config.UI.AIAimlines;
-                if (ImGui.Checkbox("AI Aimlines", ref aiAimlines))
+                if (ImGui.Checkbox(Loc.T("AI Aimlines"), ref aiAimlines))
                 {
                     Config.UI.AIAimlines = aiAimlines;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Show dynamic aim lines for AI players");
+                    ImGui.SetTooltip(Loc.T("Show dynamic aim lines for AI players"));
 
                 bool connectGroups = Program.Config.UI.ConnectGroups;
-                if (ImGui.Checkbox("Connect Groups", ref connectGroups))
+                if (ImGui.Checkbox(Loc.T("Connect Groups"), ref connectGroups))
                 {
                     Program.Config.UI.ConnectGroups = connectGroups;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Draw lines between grouped players");
+                    ImGui.SetTooltip(Loc.T("Draw lines between grouped players"));
 
-                ImGui.SeparatorText("Misc");
+                ImGui.SeparatorText(Loc.T("Misc"));
 
                 bool autoGroups = Config.Misc.AutoGroups;
-                if (ImGui.Checkbox("Auto Groups", ref autoGroups))
+                if (ImGui.Checkbox(Loc.T("Auto Groups"), ref autoGroups))
                 {
                     Config.Misc.AutoGroups = autoGroups;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Best-effort: automatically infer groups before raid start based on proximity");
+                    ImGui.SetTooltip(Loc.T("Best-effort: automatically infer groups before raid start based on proximity"));
 
                 ImGui.EndTabItem();
             }
@@ -279,17 +295,17 @@ namespace LoneEftDmaRadar.UI.Panels
 
         private static void DrawLootTab()
         {
-            if (ImGui.BeginTabItem("Loot"))
+            if (ImGui.BeginTabItem(Loc.Title("Loot")))
             {
-                ImGui.SeparatorText("Loot Settings");
+                ImGui.SeparatorText(Loc.T("Loot Settings"));
 
                 bool lootEnabled = Config.Loot.Enabled;
-                if (ImGui.Checkbox("Show Loot (F3)", ref lootEnabled))
+                if (ImGui.Checkbox(Loc.T("Show Loot (F3)"), ref lootEnabled))
                 {
                     Config.Loot.Enabled = lootEnabled;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Toggle loot display on the radar");
+                    ImGui.SetTooltip(Loc.T("Toggle loot display on the radar"));
 
                 if (!lootEnabled)
                 {
@@ -297,12 +313,12 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
 
                 bool showWishlist = Config.Loot.ShowWishlist;
-                if (ImGui.Checkbox("Show Wishlist Items", ref showWishlist))
+                if (ImGui.Checkbox(Loc.T("Show Wishlist Items"), ref showWishlist))
                 {
                     Config.Loot.ShowWishlist = showWishlist;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Highlight items from your Tarkov wishlist");
+                    ImGui.SetTooltip(Loc.T("Highlight items from your Tarkov wishlist"));
 
                 if (!lootEnabled)
                 {
@@ -315,15 +331,15 @@ namespace LoneEftDmaRadar.UI.Panels
 
         private static void DrawContainersTab()
         {
-            if (ImGui.BeginTabItem("Containers"))
+            if (ImGui.BeginTabItem(Loc.Title("Containers")))
             {
                 bool containersEnabled = Config.Containers.Enabled;
-                if (ImGui.Checkbox("Show Containers", ref containersEnabled))
+                if (ImGui.Checkbox(Loc.T("Show Containers"), ref containersEnabled))
                 {
                     Config.Containers.Enabled = containersEnabled;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Show lootable containers on the radar");
+                    ImGui.SetTooltip(Loc.T("Show lootable containers on the radar"));
 
                 if (!containersEnabled)
                 {
@@ -331,15 +347,15 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
 
                 float drawDistance = Config.Containers.DrawDistance;
-                if (ImGui.SliderFloat("Draw Distance", ref drawDistance, 10, 500))
+                if (ImGui.SliderFloat(Loc.T("Draw Distance"), ref drawDistance, 10, 500))
                 {
                     Config.Containers.DrawDistance = drawDistance;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Maximum distance to show containers");
+                    ImGui.SetTooltip(Loc.T("Maximum distance to show containers"));
 
                 bool selectAll = Config.Containers.SelectAll;
-                if (ImGui.Checkbox("Select All", ref selectAll))
+                if (ImGui.Checkbox(Loc.T("Select All"), ref selectAll))
                 {
                     Config.Containers.SelectAll = selectAll;
                     if (_containerEntries is not null)
@@ -351,9 +367,9 @@ namespace LoneEftDmaRadar.UI.Panels
                     }
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Toggle all container types");
+                    ImGui.SetTooltip(Loc.T("Toggle all container types"));
 
-                ImGui.SeparatorText("Container Types");
+                ImGui.SeparatorText(Loc.T("Container Types"));
 
                 if (_containerEntries is not null)
                 {
@@ -382,17 +398,17 @@ namespace LoneEftDmaRadar.UI.Panels
 
         private static void DrawQuestHelperTab()
         {
-            if (ImGui.BeginTabItem("Quest Helper"))
+            if (ImGui.BeginTabItem(Loc.Title("Quest Helper")))
             {
                 bool questHelperEnabled = Config.QuestHelper.Enabled;
-                if (ImGui.Checkbox("Enable Quest Helper", ref questHelperEnabled))
+                if (ImGui.Checkbox(Loc.T("Enable Quest Helper"), ref questHelperEnabled))
                 {
                     Config.QuestHelper.Enabled = questHelperEnabled;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Show quest objectives and items on the radar");
+                    ImGui.SetTooltip(Loc.T("Show quest objectives and items on the radar"));
 
-                ImGui.SeparatorText("Active Quests");
+                ImGui.SeparatorText(Loc.T("Active Quests"));
 
                 if (Memory.QuestManager?.Quests is IReadOnlyDictionary<string, Tarkov.GameWorld.Quests.QuestEntry> quests)
                 {
@@ -415,7 +431,7 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
                 else
                 {
-                    ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "No active quests (not in raid)");
+                    ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), Loc.T("No active quests (not in raid)"));
                 }
 
                 ImGui.EndTabItem();
@@ -424,14 +440,14 @@ namespace LoneEftDmaRadar.UI.Panels
 
         private static void DrawAboutTab()
         {
-            if (ImGui.BeginTabItem("About"))
+            if (ImGui.BeginTabItem(Loc.Title("About")))
             {
                 ImGui.Text(Program.Name);
                 ImGui.Separator();
-                ImGui.TextWrapped("A DMA-based radar for Escape From Tarkov.");
+                ImGui.TextWrapped(Loc.T("A DMA-based radar for Escape From Tarkov."));
 
                 ImGui.Spacing();
-                if (ImGui.Button("Visit Website"))
+                if (ImGui.Button(Loc.WithId("Visit Website##VisitWebsite")))
                 {
                     try
                     {
@@ -452,11 +468,21 @@ namespace LoneEftDmaRadar.UI.Panels
             {
                 var backupFile = Path.Combine(Program.ConfigPath.FullName, $"{EftDmaConfig.Filename}.userbak");
                 File.WriteAllText(backupFile, JsonSerializer.Serialize(Program.Config, AppJsonContext.Default.EftDmaConfig));
-                MessageBox.Show(RadarWindow.Handle, $"Backed up to {backupFile}", "Backup Config", MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show(
+                    RadarWindow.Handle,
+                    string.Format(Loc.T("Backed up to {0}"), backupFile),
+                    Loc.T("Backup Config"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(RadarWindow.Handle, $"Error: {ex.Message}", "Backup Config", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    RadarWindow.Handle,
+                    string.Format(Loc.T("Error: {0}"), ex.Message),
+                    Loc.T("Backup Config"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
@@ -468,12 +494,27 @@ namespace LoneEftDmaRadar.UI.Panels
             }
             catch (Exception ex)
             {
-                MessageBox.Show(RadarWindow.Handle, $"Error: {ex.Message}", "Open Config", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show(
+                    RadarWindow.Handle,
+                    string.Format(Loc.T("Error: {0}"), ex.Message),
+                    Loc.T("Open Config"),
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
             }
         }
 
         private static void UpdateScaleValues(float newScale)
         {
+            // ImGui UI scaling (text/widgets). This is separate from Skia rendering.
+            try
+            {
+                ImGui.GetIO().FontGlobalScale = newScale;
+            }
+            catch
+            {
+                // Ignore if ImGui context isn't ready yet.
+            }
+
             // Update Paints
             SKPaints.TextOutline.StrokeWidth = 2f * newScale;
             SKPaints.PaintLocalPlayer.StrokeWidth = 1.66f * newScale;

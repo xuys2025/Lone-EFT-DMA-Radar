@@ -29,6 +29,7 @@ SOFTWARE.
 using ImGuiNET;
 using LoneEftDmaRadar.Tarkov;
 using LoneEftDmaRadar.UI.Loot;
+using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.UI.Skia;
 using LoneEftDmaRadar.Web.TarkovDev;
 
@@ -130,13 +131,13 @@ namespace LoneEftDmaRadar.UI.Panels
         /// </summary>
         public static void Draw()
         {
-            ImGui.SeparatorText("Filter Selection");
+            ImGui.SeparatorText(Loc.T("Filter Selection"));
 
             // Filter dropdown
             if (_filterNames.Count > 0)
             {
                 string currentFilter = SelectedFilterName ?? string.Empty;
-                if (ImGui.BeginCombo("Active Filter", currentFilter))
+                if (ImGui.BeginCombo(Loc.WithId("Active Filter##ActiveFilter"), currentFilter))
                 {
                     for (int i = 0; i < _filterNames.Count; i++)
                     {
@@ -154,51 +155,51 @@ namespace LoneEftDmaRadar.UI.Panels
                     ImGui.EndCombo();
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Select which loot filter to edit");
+                    ImGui.SetTooltip(Loc.T("Select which loot filter to edit"));
             }
 
             // Filter management buttons
-            if (ImGui.Button("Add Filter"))
+            if (ImGui.Button(Loc.WithId("Add Filter##AddFilter")))
             {
                 _newFilterName = string.Empty;
                 _showAddFilterPopup = true;
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Create a new loot filter");
+                ImGui.SetTooltip(Loc.T("Create a new loot filter"));
             ImGui.SameLine();
-            if (ImGui.Button("Rename"))
+            if (ImGui.Button(Loc.WithId("Rename##RenameFilter")))
             {
                 _renameFilterName = SelectedFilterName ?? string.Empty;
                 _showRenamePopup = true;
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Rename the current filter");
+                ImGui.SetTooltip(Loc.T("Rename the current filter"));
             ImGui.SameLine();
-            if (ImGui.Button("Delete"))
+            if (ImGui.Button(Loc.WithId("Delete##DeleteFilter")))
             {
                 DeleteCurrentFilter();
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Delete the current filter");
+                ImGui.SetTooltip(Loc.T("Delete the current filter"));
 
             // Add Filter Popup
             if (_showAddFilterPopup)
             {
-                ImGui.OpenPopup("Add Filter");
+                ImGui.OpenPopup(Loc.Title("Add Filter"));
             }
-            if (ImGui.BeginPopupModal("Add Filter", ref _showAddFilterPopup, ImGuiWindowFlags.AlwaysAutoResize))
+            if (ImGui.BeginPopupModal(Loc.Title("Add Filter"), ref _showAddFilterPopup, ImGuiWindowFlags.AlwaysAutoResize))
             {
-                ImGui.Text("Enter the name of the new loot filter:");
+                ImGui.Text(Loc.T("Enter the name of the new loot filter:"));
                 ImGui.InputText("##NewFilterName", ref _newFilterName, 64);
 
-                if (ImGui.Button("Create", new Vector2(120, 0)))
+                if (ImGui.Button(Loc.WithId("Create##CreateFilter"), new Vector2(120, 0)))
                 {
                     AddFilter(_newFilterName);
                     _showAddFilterPopup = false;
                     ImGui.CloseCurrentPopup();
                 }
                 ImGui.SameLine();
-                if (ImGui.Button("Cancel", new Vector2(120, 0)))
+                if (ImGui.Button(Loc.WithId("Cancel##CancelCreateFilter"), new Vector2(120, 0)))
                 {
                     _showAddFilterPopup = false;
                     ImGui.CloseCurrentPopup();
@@ -209,21 +210,21 @@ namespace LoneEftDmaRadar.UI.Panels
             // Rename Popup
             if (_showRenamePopup)
             {
-                ImGui.OpenPopup("Rename Filter");
+                ImGui.OpenPopup(Loc.Title("Rename Filter"));
             }
-            if (ImGui.BeginPopupModal("Rename Filter", ref _showRenamePopup, ImGuiWindowFlags.AlwaysAutoResize))
+            if (ImGui.BeginPopupModal(Loc.Title("Rename Filter"), ref _showRenamePopup, ImGuiWindowFlags.AlwaysAutoResize))
             {
-                ImGui.Text("Enter the new filter name:");
+                ImGui.Text(Loc.T("Enter the new filter name:"));
                 ImGui.InputText("##RenameFilterName", ref _renameFilterName, 64);
 
-                if (ImGui.Button("Rename", new Vector2(120, 0)))
+                if (ImGui.Button(Loc.WithId("Rename##ConfirmRenameFilter"), new Vector2(120, 0)))
                 {
                     RenameCurrentFilter(_renameFilterName);
                     _showRenamePopup = false;
                     ImGui.CloseCurrentPopup();
                 }
                 ImGui.SameLine();
-                if (ImGui.Button("Cancel", new Vector2(120, 0)))
+                if (ImGui.Button(Loc.WithId("Cancel##CancelRenameFilter"), new Vector2(120, 0)))
                 {
                     _showRenamePopup = false;
                     ImGui.CloseCurrentPopup();
@@ -238,15 +239,15 @@ namespace LoneEftDmaRadar.UI.Panels
             if (currentFilterObj is not null)
             {
                 bool filterEnabled = currentFilterObj.Enabled;
-                if (ImGui.Checkbox("Filter Enabled", ref filterEnabled))
+                if (ImGui.Checkbox(Loc.WithId("Filter Enabled##FilterEnabled"), ref filterEnabled))
                 {
                     currentFilterObj.Enabled = filterEnabled;
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Enable or disable this filter");
+                    ImGui.SetTooltip(Loc.T("Enable or disable this filter"));
 
                 // Filter color with color picker
-                ImGui.Text("Filter Color:");
+                ImGui.Text(Loc.T("Filter Color:"));
                 ImGui.SameLine();
 
                 // Color preview button
@@ -256,7 +257,7 @@ namespace LoneEftDmaRadar.UI.Panels
                     ImGui.OpenPopup("FilterColorPicker");
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Click to change filter color");
+                    ImGui.SetTooltip(Loc.T("Click to change filter color"));
 
                 // Color picker popup
                 if (ImGui.BeginPopup("FilterColorPicker"))
@@ -270,7 +271,7 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
 
                 ImGui.SameLine();
-                if (ImGui.Button("Apply to all"))
+                if (ImGui.Button(Loc.WithId("Apply to all##ApplyToAll")))
                 {
                     string filterColor = currentFilterObj.Color;
                     foreach (var entry in _currentFilterEntries)
@@ -281,18 +282,18 @@ namespace LoneEftDmaRadar.UI.Panels
                     _entryColorHexes.Clear();
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Reset all entries to inherit filter color");
+                    ImGui.SetTooltip(Loc.T("Reset all entries to inherit filter color"));
             }
 
-            ImGui.SeparatorText("Add Item to Filter");
+            ImGui.SeparatorText(Loc.T("Add Item to Filter"));
 
             // Item search
-            if (ImGui.InputText("Search Items", ref _itemSearchText, 128))
+            if (ImGui.InputText(Loc.WithId("Search Items##ItemSearch"), ref _itemSearchText, 128))
             {
                 FilterItems();
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Search for items to add to the filter");
+                ImGui.SetTooltip(Loc.T("Search for items to add to the filter"));
 
             // Item list
             if (ImGui.BeginListBox("##ItemList", new Vector2(-1, 150)))
@@ -311,24 +312,24 @@ namespace LoneEftDmaRadar.UI.Panels
                 ImGui.EndListBox();
             }
 
-            if (ImGui.Button("Add Selected Item") && _selectedItemIndex >= 0 && _selectedItemIndex < _filteredItems.Count)
+            if (ImGui.Button(Loc.WithId("Add Selected Item##AddSelectedItem")) && _selectedItemIndex >= 0 && _selectedItemIndex < _filteredItems.Count)
             {
                 AddItemToFilter(_filteredItems[_selectedItemIndex]);
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Add the selected item to this filter");
+                ImGui.SetTooltip(Loc.T("Add the selected item to this filter"));
 
-            ImGui.SeparatorText("Filter Entries");
+            ImGui.SeparatorText(Loc.T("Filter Entries"));
 
             // Entries table
             var tableFlags = ImGuiTableFlags.Borders | ImGuiTableFlags.Resizable | ImGuiTableFlags.ScrollY | ImGuiTableFlags.Sortable;
             if (ImGui.BeginTable("FilterEntriesTable", 5, tableFlags, new Vector2(0, 200)))
             {
-                ImGui.TableSetupColumn("Enabled", ImGuiTableColumnFlags.WidthFixed, 60);
-                ImGui.TableSetupColumn("Item", ImGuiTableColumnFlags.WidthStretch);
-                ImGui.TableSetupColumn("Type", ImGuiTableColumnFlags.WidthFixed, 100);
-                ImGui.TableSetupColumn("Color", ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort, 100);
-                ImGui.TableSetupColumn("Remove", ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort, 60);
+                ImGui.TableSetupColumn(Loc.T("Enabled"), ImGuiTableColumnFlags.WidthFixed, 60);
+                ImGui.TableSetupColumn(Loc.T("Item"), ImGuiTableColumnFlags.WidthStretch);
+                ImGui.TableSetupColumn(Loc.T("Type"), ImGuiTableColumnFlags.WidthFixed, 100);
+                ImGui.TableSetupColumn(Loc.T("Color"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort, 100);
+                ImGui.TableSetupColumn(Loc.T("Remove"), ImGuiTableColumnFlags.WidthFixed | ImGuiTableColumnFlags.NoSort, 60);
                 ImGui.TableHeadersRow();
 
                 // Apply sorting to the underlying list when requested by ImGui.
@@ -405,7 +406,7 @@ namespace LoneEftDmaRadar.UI.Panels
                             entry.Color = newHex;
                         }
                         ImGui.Separator();
-                        if (ImGui.Button("Inherit from filter"))
+                        if (ImGui.Button(Loc.WithId("Inherit from filter##InheritFromFilter")))
                         {
                             entry.Color = filterColorHex; // Set to filter color to indicate inheritance
                             TryParseHex(filterColorHex, out entryColor);
@@ -419,7 +420,7 @@ namespace LoneEftDmaRadar.UI.Panels
                     ImGui.SameLine();
                     if (inheritsColor)
                     {
-                        ImGui.TextDisabled("(inherited)");
+                        ImGui.TextDisabled(Loc.T("(inherited)"));
                     }
 
                     // Remove button

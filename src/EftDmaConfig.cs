@@ -282,6 +282,12 @@ namespace LoneEftDmaRadar
     public sealed class UIConfig
     {
         /// <summary>
+        /// UI language code. Supported: "en", "zh-CN".
+        /// </summary>
+        [JsonPropertyName("language")]
+        public string Language { get; set; } = "zh-CN";
+
+        /// <summary>
         /// Set FPS for the Radar Window (default: 60)
         /// </summary>
         [JsonPropertyName("fps")]

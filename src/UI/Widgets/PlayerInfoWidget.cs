@@ -31,6 +31,7 @@ using ImGuiNET;
 using LoneEftDmaRadar.Misc;
 using LoneEftDmaRadar.Tarkov.GameWorld.Player;
 using LoneEftDmaRadar.Tarkov.GameWorld.Player.Helpers;
+using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.UI.Skia;
 
 namespace LoneEftDmaRadar.UI.Widgets
@@ -88,7 +89,7 @@ namespace LoneEftDmaRadar.UI.Widgets
             bool isOpen = IsOpen;
             var windowFlags = ImGuiWindowFlags.AlwaysAutoResize | ImGuiWindowFlags.NoScrollbar;
 
-            if (!ImGui.Begin("Player Info", ref isOpen, windowFlags))
+            if (!ImGui.Begin(Loc.Title("Player Info"), ref isOpen, windowFlags))
             {
                 IsOpen = isOpen;
                 ImGui.End();
@@ -98,7 +99,7 @@ namespace LoneEftDmaRadar.UI.Widgets
 
             if (filteredPlayers.Count == 0)
             {
-                ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "No hostile players detected");
+                ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), Loc.T("No hostile players detected"));
                 ImGui.End();
                 return;
             }
@@ -114,11 +115,11 @@ namespace LoneEftDmaRadar.UI.Widgets
             if (ImGui.BeginTable("PlayersTable", 5, tableFlags))
             {
                 // New compact column layout
-                ImGui.TableSetupColumn("Name", ImGuiTableColumnFlags.WidthFixed, 65f);
-                ImGui.TableSetupColumn("In Hands", ImGuiTableColumnFlags.WidthFixed, 150f);
-                ImGui.TableSetupColumn("Secure", ImGuiTableColumnFlags.WidthFixed, 45f);
-                ImGui.TableSetupColumn("Value", ImGuiTableColumnFlags.WidthFixed, 45f);
-                ImGui.TableSetupColumn("Dist", ImGuiTableColumnFlags.WidthFixed, 35f);
+                ImGui.TableSetupColumn(Loc.T("Name"), ImGuiTableColumnFlags.WidthFixed, 65f);
+                ImGui.TableSetupColumn(Loc.T("In Hands"), ImGuiTableColumnFlags.WidthFixed, 150f);
+                ImGui.TableSetupColumn(Loc.T("Secure"), ImGuiTableColumnFlags.WidthFixed, 45f);
+                ImGui.TableSetupColumn(Loc.T("Value"), ImGuiTableColumnFlags.WidthFixed, 45f);
+                ImGui.TableSetupColumn(Loc.T("Dist"), ImGuiTableColumnFlags.WidthFixed, 35f);
                 ImGui.TableHeadersRow();
 
                 foreach (var player in filteredPlayers.Span)

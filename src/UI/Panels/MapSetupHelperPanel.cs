@@ -28,6 +28,7 @@ SOFTWARE.
 
 using ImGuiNET;
 using LoneEftDmaRadar.UI.Maps;
+using LoneEftDmaRadar.UI.Localization;
 
 namespace LoneEftDmaRadar.UI.Panels
 {
@@ -67,7 +68,7 @@ namespace LoneEftDmaRadar.UI.Panels
             bool isOpen = IsOpen;
             ImGui.SetNextWindowSize(new Vector2(350, 220), ImGuiCond.FirstUseEver);
 
-            if (ImGui.Begin("Map Setup Helper", ref isOpen))
+            if (ImGui.Begin(Loc.Title("Map Setup Helper"), ref isOpen))
             {
                 var currentMap = EftMapManager.Map?.Config;
 
@@ -78,61 +79,61 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
 
                 // Current coordinates display
-                ImGui.Text("Current Coordinates:");
+                ImGui.Text(Loc.T("Current Coordinates:"));
                 ImGui.TextColored(new Vector4(0.2f, 0.8f, 0.2f, 1f), Coords);
 
                 ImGui.Separator();
 
                 if (currentMap is null)
                 {
-                    ImGui.TextColored(new Vector4(1f, 0.5f, 0.5f, 1f), "No map loaded!");
+                    ImGui.TextColored(new Vector4(1f, 0.5f, 0.5f, 1f), Loc.T("No map loaded!"));
                 }
                 else
                 {
                     // Map name display
-                    ImGui.Text($"Map: {currentMap.Name}");
+                    ImGui.Text($"{Loc.T("Map:")} {currentMap.Name}");
                     ImGui.Spacing();
 
                     // X, Y inputs on same line
-                    ImGui.Text("X, Y:");
+                    ImGui.Text(Loc.T("X, Y:"));
                     ImGui.SetNextItemWidth(120);
                     ImGui.InputFloat("##MapX", ref _x, 1f, 10f, "%.1f");
                     if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Map X offset");
+                        ImGui.SetTooltip(Loc.T("Map X offset"));
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(120);
                     ImGui.InputFloat("##MapY", ref _y, 1f, 10f, "%.1f");
                     if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Map Y offset");
+                        ImGui.SetTooltip(Loc.T("Map Y offset"));
 
                     // Scale input
-                    ImGui.Text("Scale:");
+                    ImGui.Text(Loc.T("Scale:"));
                     ImGui.SetNextItemWidth(120);
                     ImGui.InputFloat("##MapScale", ref _scale, 0.01f, 0.1f, "%.4f");
                     if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Map scale factor");
+                        ImGui.SetTooltip(Loc.T("Map scale factor"));
 
                     ImGui.Spacing();
                     ImGui.Separator();
                     ImGui.Spacing();
 
                     // Apply button
-                    if (ImGui.Button("Apply", new Vector2(80, 0)))
+                    if (ImGui.Button(Loc.WithId("Apply##ApplyMap"), new Vector2(80, 0)))
                     {
                         ApplyMapValues(currentMap);
                     }
                     if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Apply changes to the map");
+                        ImGui.SetTooltip(Loc.T("Apply changes to the map"));
 
                     ImGui.SameLine();
 
                     // Reset button
-                    if (ImGui.Button("Reset", new Vector2(80, 0)))
+                    if (ImGui.Button(Loc.WithId("Reset##ResetMap"), new Vector2(80, 0)))
                     {
                         LoadMapValues(currentMap);
                     }
                     if (ImGui.IsItemHovered())
-                        ImGui.SetTooltip("Reset to current map values");
+                        ImGui.SetTooltip(Loc.T("Reset to current map values"));
                 }
             }
             ImGui.End();

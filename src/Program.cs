@@ -23,6 +23,7 @@ global using MessageBoxResult = LoneEftDmaRadar.UI.Misc.MessageBoxResult;
 global using RateLimiter = LoneEftDmaRadar.Misc.RateLimiter;
 using LoneEftDmaRadar.Tarkov;
 using LoneEftDmaRadar.UI;
+using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.UI.Maps;
 using LoneEftDmaRadar.UI.Misc;
 using LoneEftDmaRadar.UI.Skia;
@@ -80,6 +81,8 @@ namespace LoneEftDmaRadar
                 if (!singleton)
                     throw new InvalidOperationException("The application is already running.");
                 Config = EftDmaConfig.Load();
+                Loc.SetLanguage(Config.UI.Language ?? string.Empty);
+                Loc.Initialize();
                 ServiceProvider = BuildServiceProvider();
                 HttpClientFactory = ServiceProvider.GetRequiredService<IHttpClientFactory>();
                 SetHighPerformanceMode();

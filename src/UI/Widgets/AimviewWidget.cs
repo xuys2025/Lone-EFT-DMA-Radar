@@ -30,6 +30,7 @@ using ImGuiNET;
 using LoneEftDmaRadar.Tarkov.GameWorld.Loot;
 using LoneEftDmaRadar.Tarkov.GameWorld.Player;
 using LoneEftDmaRadar.Tarkov.GameWorld.Player.Helpers;
+using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.UI.Skia;
 using Silk.NET.OpenGL;
 
@@ -157,7 +158,7 @@ namespace LoneEftDmaRadar.UI.Widgets
             ImGui.SetNextWindowSize(new System.Numerics.Vector2(300, 300), ImGuiCond.FirstUseEver);
 
             bool isOpen = IsOpen;
-            if (!ImGui.Begin("Aimview", ref isOpen, ImGuiWindowFlags.None))
+            if (!ImGui.Begin(Loc.Title("Aimview"), ref isOpen, ImGuiWindowFlags.None))
             {
                 IsOpen = isOpen;
                 ImGui.End();
@@ -185,7 +186,7 @@ namespace LoneEftDmaRadar.UI.Widgets
             }
             else
             {
-                ImGui.Text("Surface not available");
+                ImGui.Text(Loc.T("Surface not available"));
             }
 
             ImGui.End();

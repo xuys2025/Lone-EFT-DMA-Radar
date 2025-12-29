@@ -40,6 +40,7 @@ using LoneEftDmaRadar.UI.Hotkeys.Internal;
 using LoneEftDmaRadar.UI.Loot;
 using LoneEftDmaRadar.UI.Maps;
 using LoneEftDmaRadar.UI.Panels;
+using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.UI.Skia;
 using LoneEftDmaRadar.UI.Widgets;
 using Silk.NET.Input;
@@ -185,14 +186,12 @@ namespace LoneEftDmaRadar.UI
             CreateSkiaSurface();
 
             // --- ImGui ---
-            ImGui.CreateContext();
-
-            // Pass the existing input context to ImGuiController to share it
-            _imgui = new ImGuiController(
-                gl: _gl,
-                view: _window,
-                input: _input  // Share the input context
-            );
+            // NOTE: Silk.NET's ImGuiController creates its own ImGui context.
+            // Configure fonts via the onConfigureIO callback so it applies to the correct context.
+            _imgui = new ImGuiController(_gl, _window, _input, () =>
+            {
+                ImGuiFonts.TryUseChineseFont(Config.UI.UIScale);
+            });
 
             // Set IniFilename AFTER context and controller are created, then load settings
             unsafe
@@ -619,18 +618,18 @@ namespace LoneEftDmaRadar.UI
                 // Draw main menu bar
                 if (ImGui.BeginMainMenuBar())
                 {
-                    if (ImGui.MenuItem("Settings", null, SettingsPanel.IsOpen))
+                    if (ImGui.MenuItem(Loc.T("Settings"), null, SettingsPanel.IsOpen))
                     {
                         SettingsPanel.IsOpen = !SettingsPanel.IsOpen;
                     }
 
                     ImGui.Separator();
 
-                    if (ImGui.MenuItem("Web Radar", null, _isWebRadarOpen))
+                    if (ImGui.MenuItem(Loc.T("Web Radar"), null, _isWebRadarOpen))
                     {
                         _isWebRadarOpen = !_isWebRadarOpen;
                     }
-                    if (ImGui.MenuItem("Loot Filters", null, _isLootFiltersOpen))
+                    if (ImGui.MenuItem(Loc.T("Loot Filters"), null, _isLootFiltersOpen))
                     {
                         _isLootFiltersOpen = !_isLootFiltersOpen;
                     }
@@ -710,11 +709,11 @@ namespace LoneEftDmaRadar.UI
         {
             bool isOpen = _isLootFiltersOpen;
             ImGui.SetNextWindowSize(new Vector2(900, 700), ImGuiCond.FirstUseEver);
-            if (ImGui.Begin("Loot Filters", ref isOpen))
+            if (ImGui.Begin(Loc.Title("Loot Filters"), ref isOpen))
             {
                 LootFiltersPanel.Draw();
                 ImGui.Separator();
-                if (ImGui.Button("Apply & Close"))
+                if (ImGui.Button(Loc.T("Apply & Close")))
                 {
                     LootFiltersPanel.RefreshLootFilter();
                     isOpen = false; // close the window this frame
@@ -735,7 +734,7 @@ namespace LoneEftDmaRadar.UI
         {
             bool isOpen = _isWebRadarOpen;
             ImGui.SetNextWindowSize(new Vector2(450, 350), ImGuiCond.FirstUseEver);
-            if (ImGui.Begin("Web Radar", ref isOpen))
+            if (ImGui.Begin(Loc.Title("Web Radar"), ref isOpen))
             {
                 WebRadarPanel.Draw();
             }

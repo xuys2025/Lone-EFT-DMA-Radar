@@ -1,0 +1,19 @@
+{
+  "Settings": "设置",
+  "General": "常规",
+  "Players": "玩家",
+  "Loot": "战利品",
+  "Containers": "容器",
+  "About": "关于",
+
+  "Tools": "工具",
+  "Display Settings": "显示设置",
+  "Widgets": "小组件",
+  "Visibility": "可见性",
+
+  "Hotkey Manager": "热键管理",
+  "Color Picker": "颜色选择",
+  "Restart Radar": "重启雷达",
+  "Backup Config": "备份配置",
+  "Open Config Folder": "打开配置文件夹"
+}

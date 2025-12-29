@@ -27,6 +27,7 @@ SOFTWARE.
 */
 
 using ImGuiNET;
+using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.Web.WebRadar;
 
 namespace LoneEftDmaRadar.UI.Panels
@@ -36,6 +37,13 @@ namespace LoneEftDmaRadar.UI.Panels
     /// </summary>
     internal static class WebRadarPanel
     {
+        private enum StartButtonState
+        {
+            Start,
+            Starting,
+            Running
+        }
+
         // Panel-local state (moved from RadarUIState)
         private static string _bindAddress;
         private static string _port;
@@ -43,7 +51,7 @@ namespace LoneEftDmaRadar.UI.Panels
         private static bool _upnpEnabled;
         private static readonly string _password;
         private static bool _isRunning;
-        private static string _startButtonText = "Start";
+        private static StartButtonState _startButtonState = StartButtonState.Start;
         private static string _serverUrl = string.Empty;
         private static bool _uiEnabled = true;
 
@@ -64,7 +72,7 @@ namespace LoneEftDmaRadar.UI.Panels
         /// </summary>
         public static void Draw()
         {
-            ImGui.SeparatorText("Web Radar Server");
+            ImGui.SeparatorText(Loc.T("Web Radar Server"));
 
             if (!_uiEnabled)
             {
@@ -72,18 +80,18 @@ namespace LoneEftDmaRadar.UI.Panels
             }
 
             // Server Configuration
-            ImGui.Text("Bind Address:");
+            ImGui.Text(Loc.T("Bind Address:"));
             ImGui.SetNextItemWidth(200);
             if (ImGui.InputText("##BindAddress", ref _bindAddress, 64))
             {
                 Config.WebRadar.IP = _bindAddress;
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("IP address to bind the server to (0.0.0.0 for all interfaces)");
+                ImGui.SetTooltip(Loc.T("IP address to bind the server to (0.0.0.0 for all interfaces)"));
             ImGui.SameLine();
-            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "(e.g., 0.0.0.0 for all interfaces)");
+            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), Loc.T("(e.g., 0.0.0.0 for all interfaces)"));
 
-            ImGui.Text("Port:");
+            ImGui.Text(Loc.T("Port:"));
             ImGui.SetNextItemWidth(100);
             if (ImGui.InputText("##Port", ref _port, 6))
             {
@@ -93,9 +101,9 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Port number for the web radar server");
+                ImGui.SetTooltip(Loc.T("Port number for the web radar server"));
 
-            ImGui.Text("Tick Rate (Hz):");
+            ImGui.Text(Loc.T("Tick Rate (Hz):"));
             ImGui.SetNextItemWidth(100);
             if (ImGui.InputText("##TickRate", ref _tickRate, 4))
             {
@@ -105,25 +113,25 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Update frequency in Hz (higher = more responsive, more bandwidth)");
+                ImGui.SetTooltip(Loc.T("Update frequency in Hz (higher = more responsive, more bandwidth)"));
 
-            if (ImGui.Checkbox("Enable UPnP", ref _upnpEnabled))
+            if (ImGui.Checkbox(Loc.WithId("Enable UPnP##EnableUPnP"), ref _upnpEnabled))
             {
                 Config.WebRadar.UPnP = _upnpEnabled;
             }
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Automatically configure port forwarding on your router");
+                ImGui.SetTooltip(Loc.T("Automatically configure port forwarding on your router"));
             ImGui.SameLine();
-            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "(Automatic port forwarding)");
+            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), Loc.T("(Automatic port forwarding)"));
 
             ImGui.Separator();
 
             // Password (read-only, auto-generated)
-            ImGui.Text("Session Password:");
+            ImGui.Text(Loc.T("Session Password:"));
             ImGui.SameLine();
             ImGui.TextColored(new Vector4(0.2f, 0.8f, 0.2f, 1f), _password);
             if (ImGui.IsItemHovered())
-                ImGui.SetTooltip("Auto-generated password for this session");
+                ImGui.SetTooltip(Loc.T("Auto-generated password for this session"));
 
             if (!_uiEnabled)
             {
@@ -133,7 +141,15 @@ namespace LoneEftDmaRadar.UI.Panels
             ImGui.Separator();
 
             // Start/Stop Button
-            if (ImGui.Button(_startButtonText, new Vector2(150, 30)))
+            string startButtonLabel = _startButtonState switch
+            {
+                StartButtonState.Start => Loc.T("Start"),
+                StartButtonState.Starting => Loc.T("Starting..."),
+                StartButtonState.Running => Loc.T("Running..."),
+                _ => Loc.T("Start")
+            };
+
+            if (ImGui.Button(startButtonLabel, new Vector2(150, 30)))
             {
                 if (!_isRunning)
                 {
@@ -141,37 +157,37 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
             }
             if (ImGui.IsItemHovered() && !_isRunning)
-                ImGui.SetTooltip("Start the web radar server");
+                ImGui.SetTooltip(Loc.T("Start the web radar server"));
 
             // Server URL
             if (!string.IsNullOrEmpty(_serverUrl))
             {
                 ImGui.Separator();
-                ImGui.Text("Server URL:");
+                ImGui.Text(Loc.T("Server URL:"));
                 ImGui.TextWrapped(_serverUrl);
 
-                if (ImGui.Button("Copy URL"))
+                if (ImGui.Button(Loc.WithId("Copy URL##CopyUrl")))
                 {
                     CopyUrlToClipboard();
                 }
                 if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip("Copy the URL to share with teammates");
+                    ImGui.SetTooltip(Loc.T("Copy the URL to share with teammates"));
             }
 
             ImGui.Separator();
 
             // Instructions
-            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), "Instructions:");
-            ImGui.BulletText("Configure the server settings above");
-            ImGui.BulletText("Click 'Start' to begin the web radar server");
-            ImGui.BulletText("Share the generated URL with teammates");
-            ImGui.BulletText("They can view the radar in their web browser");
+            ImGui.TextColored(new Vector4(0.7f, 0.7f, 0.7f, 1f), Loc.T("Instructions:"));
+            ImGui.BulletText(Loc.T("Configure the server settings above"));
+            ImGui.BulletText(Loc.T("Click 'Start' to begin the web radar server"));
+            ImGui.BulletText(Loc.T("Share the generated URL with teammates"));
+            ImGui.BulletText(Loc.T("They can view the radar in their web browser"));
         }
 
         private static async void StartServer()
         {
             _uiEnabled = false;
-            _startButtonText = "Starting...";
+            _startButtonState = StartButtonState.Starting;
 
             try
             {
@@ -183,14 +199,16 @@ namespace LoneEftDmaRadar.UI.Panels
                 await WebRadarServer.StartAsync(bindIP, port, tickRate, _upnpEnabled);
 
                 _isRunning = true;
-                _startButtonText = "Running...";
+                _startButtonState = StartButtonState.Running;
                 _serverUrl = $"http://dc64dcid9fd4.cloudfront.net/?host={externalIP}&port={port}&password={_password}";
             }
             catch (Exception ex)
             {
-                MessageBox.Show(RadarWindow.Handle, $"ERROR Starting Web Radar Server: {ex.Message}", "Web Radar",
+                MessageBox.Show(RadarWindow.Handle,
+                    string.Format(Loc.T("ERROR Starting Web Radar Server: {0}"), ex.Message),
+                    Loc.T("Web Radar"),
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                _startButtonText = "Start";
+                _startButtonState = StartButtonState.Start;
                 _uiEnabled = true;
             }
         }
@@ -202,13 +220,15 @@ namespace LoneEftDmaRadar.UI.Panels
                 if (!string.IsNullOrWhiteSpace(_serverUrl))
                 {
                     Clipboard.SetText(_serverUrl);
-                    MessageBox.Show(RadarWindow.Handle, "Web Radar URL copied to clipboard.", "Web Radar",
+                    MessageBox.Show(RadarWindow.Handle, Loc.T("Web Radar URL copied to clipboard."), Loc.T("Web Radar"),
                         MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(RadarWindow.Handle, $"Failed to copy URL: {ex.Message}", "Web Radar",
+                MessageBox.Show(RadarWindow.Handle,
+                    string.Format(Loc.T("Failed to copy URL: {0}"), ex.Message),
+                    Loc.T("Web Radar"),
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
