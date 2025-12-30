@@ -31,6 +31,7 @@ using LoneEftDmaRadar.Tarkov.Unity;
 using LoneEftDmaRadar.Tarkov.Unity.Collections;
 using LoneEftDmaRadar.Tarkov.Unity.Structures;
 using VmmSharpEx;
+using VmmSharpEx.Extensions;
 using VmmSharpEx.Scatter;
 
 namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
@@ -38,6 +39,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
     public sealed class LocalPlayer : ClientPlayer
     {
         private UnityTransform _lookRaycastTransform;
+        private VmmPointer _hands;
 
         /// <summary>
         /// Local Player's 'Look' position.
@@ -49,50 +51,55 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
         public Vector3 LookPosition => _lookRaycastTransform?.Position ?? this.Position;
 
         /// <summary>
-        /// Raid ID the LocalPlayer is currently in.
-        /// </summary>
-        public int RaidId { get; }
-
-        private VmmPointer _hands;
-        /// <summary>
-        /// Hands item pointer.
-        /// </summary>
-        public ulong Hands => _hands;
-
-        /// <summary>
         /// Player name.
         /// </summary>
-        public override string Name
-        {
-            get => "localPlayer";
-        }
+        public override string Name => "localPlayer";
         /// <summary>
         /// Player is Human-Controlled.
         /// </summary>
-        public override bool IsHuman { get; }
+        public override bool IsHuman => true;
 
         public LocalPlayer(ulong playerBase) : base(playerBase)
         {
             string classType = ObjectClass.ReadName(this);
             if (!(classType == "LocalPlayer" || classType == "ClientPlayer"))
                 throw new ArgumentOutOfRangeException(nameof(classType));
-            IsHuman = true;
-            RaidId = GetRaidId();
+        }
+
+        /// <summary>
+        /// Check if the Raid has started for the LocalPlayer.
+        /// Does not throw.
+        /// </summary>
+        /// <returns>True if the Raid has started, otherwise false.</returns>
+        public bool CheckIsRaidStarted()
+        {
+            try
+            {
+                ulong hands = _hands;
+                if (hands.IsValidUserVA())
+                {
+                    string handsType = ObjectClass.ReadName(hands);
+                    return !string.IsNullOrWhiteSpace(handsType) && handsType != "ClientEmptyHandsController";
+                }
+            }
+            catch { }
+            return false;
         }
 
         /// <summary>
         /// Get the Raid ID the LocalPlayer is currently in.
         /// </summary>
-        /// <returns>Id or -1 if failed.</returns>
-        private int GetRaidId()
+        /// <returns>Id or null if failed.</returns>
+        public int? GetRaidId()
         {
             try
             {
                 return Memory.ReadValue<int>(this + Offsets.Player.RaidId);
             }
-            catch
+            catch (Exception ex)
             {
-                return -1;
+                Logging.WriteLine($"[LocalPlayer] ERROR Getting Raid Id: {ex}");
+                return null;
             }
         }
 
@@ -100,7 +107,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
         {
             try
             {
-                if (Program.Config.AimviewWidget.Enabled)
+                if (Config.AimviewWidget.Enabled)
                 {
                     _lookRaycastTransform ??= new UnityTransform(
                         transformInternal: Memory.ReadPtrChain(Memory.ReadPtr(this + Offsets.Player._playerLookRaycastTransform), true, 0x10),
@@ -145,7 +152,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
         {
             try
             {
-                if (Program.Config.AimviewWidget.Enabled && _lookRaycastTransform is UnityTransform existing)
+                if (Config.AimviewWidget.Enabled && _lookRaycastTransform is UnityTransform existing)
                 {
                     round1.PrepareReadPtr(existing.TransformInternal + UnitySDK.UnityOffsets.TransformAccess_HierarchyOffset); // Transform Hierarchy
                     round1.Completed += (sender, s1) =>

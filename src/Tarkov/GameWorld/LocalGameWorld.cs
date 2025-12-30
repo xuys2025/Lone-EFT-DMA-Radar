@@ -26,6 +26,7 @@ SOFTWARE.
  *
 */
 
+using LoneEftDmaRadar.Misc;
 using LoneEftDmaRadar.Misc.Workers;
 using LoneEftDmaRadar.Tarkov.GameWorld.Exits;
 using LoneEftDmaRadar.Tarkov.GameWorld.Explosives;
@@ -35,7 +36,6 @@ using LoneEftDmaRadar.Tarkov.GameWorld.Player;
 using LoneEftDmaRadar.Tarkov.GameWorld.Player.Helpers;
 using LoneEftDmaRadar.Tarkov.GameWorld.Quests;
 using LoneEftDmaRadar.Tarkov.Unity.Structures;
-using VmmSharpEx.Extensions;
 using VmmSharpEx.Options;
 
 namespace LoneEftDmaRadar.Tarkov.GameWorld
@@ -49,6 +49,8 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld
         #region Fields / Properties / Constructors
 
         public static implicit operator ulong(LocalGameWorld x) => x.Base;
+
+        private static EftDmaConfig Config { get; } = Program.Config;
 
         /// <summary>
         /// LocalGameWorld Address.
@@ -118,6 +120,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld
                 _explosivesManager = new(localGameWorld);
                 Hazards = GetHazards(MapID);
                 Exits = GetExits(MapID, _rgtPlayers.LocalPlayer.IsPmc);
+                RaidStarted = _rgtPlayers.LocalPlayer.CheckIsRaidStarted();
             }
             catch
             {
@@ -332,7 +335,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld
             var ct = e.CancellationToken;
             ValidatePlayerTransforms(); // Check for transform anomalies
             Loot.Refresh(ct);
-            if (Program.Config.Loot.ShowWishlist)
+            if (Config.Loot.ShowWishlist)
                 Memory.LocalPlayer?.RefreshWishlist(ct);
             RefreshEquipment(ct);
             RefreshQuestHelper(ct);
@@ -350,19 +353,19 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld
                 return;
             try
             {
-                if (localPlayer.Hands is ulong hands && hands.IsValidUserVA())
+                RaidStarted = localPlayer.CheckIsRaidStarted();
+                if (RaidStarted)
                 {
-                    string handsType = ObjectClass.ReadName(hands);
-                    RaidStarted = !string.IsNullOrWhiteSpace(handsType) && handsType != "ClientEmptyHandsController";
-                    if (!RaidStarted && !localPlayer.IsScav && Program.Config.Misc.AutoGroups)
-                    {
-                        RefreshGroups(localPlayer, ct);
-                    }
-                    else
-                    {
-                        Logging.WriteLine("[PreRaidStartChecks] Raid has started!");
-                    }
+                    Logging.WriteLine("[PreRaidStartChecks] Raid has started!");
                 }
+                if (Config.Misc.AutoGroups && !RaidStarted && !localPlayer.IsScav)
+                {
+                    RefreshGroups(localPlayer, ct);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -378,74 +381,117 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld
         private void RefreshGroups(LocalPlayer localPlayer, CancellationToken ct)
         {
             ct.ThrowIfCancellationRequested();
-            const float groupDistanceThreshold = 10f;
-            int raidId = localPlayer.RaidId;
-            if (!Program.Config.Cache.Groups.TryGetValue(raidId, out var groups))
-                Program.Config.Cache.Groups[raidId] = groups = new();
 
-            var humanPlayers = _rgtPlayers
-                .Where(p => p.IsPmc && p.Position != Vector3.Zero)
+            const float groupDistanceThreshold = 15f;
+
+            if (localPlayer.GetRaidId() is not int raidId)
+                return;
+
+            // Build new assignments in a local dict
+            var newGroups = new ConcurrentDictionary<int, int>();
+
+            // Collect all valid human players
+            var players = _rgtPlayers
+                .Where(p => p.Position.IsNormal() && Vector3.Distance(p.Position, Vector3.Zero) > 1f)
                 .OfType<ObservedPlayer>()
                 .ToList();
 
-            if (humanPlayers.Count == 0)
-                return;
-
-            // Players near LocalPlayer (probable teammates)
-            var nearLocalPlayer = humanPlayers
-                .Where(p => p.Type != PlayerType.Teammate && Vector3.Distance(localPlayer.Position, p.Position) <= groupDistanceThreshold);
-
-            foreach (var player in nearLocalPlayer)
+            if (players.Count == 0)
             {
-                groups[player.Id] = -100; // -100 indicates teammate
-                player.AssignTeammate();
+                // No players - replace with empty dict
+                Config.Cache.Groups[raidId] = newGroups;
+                return;
             }
-            var hostilePlayers = humanPlayers
-                .Where(p => p.IsHostile)
-                .ToList();
 
-            // Group hostile players within threshold distance using transitive clustering
-            var ungrouped = new HashSet<ObservedPlayer>(hostilePlayers);
-            int groupId = groups.Values.Where(v => v >= 0).DefaultIfEmpty(0).Max() + 1; // Start after existing max group ID
+            // Include LocalPlayer as a node (synthetic ID)
+            const int localId = int.MinValue;
+            var allNodes = new Dictionary<int, Vector3>
+            {
+                [localId] = localPlayer.Position
+            };
 
-            while (ungrouped.Count > 0)
+            foreach (var p in players)
+                allNodes[p.Id] = p.Position;
+
+            // Union-Find
+            var parent = allNodes.Keys.ToDictionary(id => id, id => id);
+
+            int Find(int id)
+            {
+                if (parent[id] != id)
+                    parent[id] = Find(parent[id]);
+                return parent[id];
+            }
+
+            void Union(int a, int b)
+            {
+                var ra = Find(a);
+                var rb = Find(b);
+                if (ra != rb)
+                    parent[ra] = rb;
+            }
+
+            // Build proximity graph
+            var ids = allNodes.Keys.ToList();
+            for (int i = 0; i < ids.Count; i++)
             {
                 ct.ThrowIfCancellationRequested();
-                var seed = ungrouped.First();
-                ungrouped.Remove(seed);
 
-                // Check if player already has a group assignment
-                if (groups.ContainsKey(seed.Id))
-                    continue;
-
-                var group = new List<ObservedPlayer> { seed };
-
-                // Expand group transitively - find all players connected within threshold
-                var toAdd = Enumerable.Empty<ObservedPlayer>();
-                do
+                for (int j = i + 1; j < ids.Count; j++)
                 {
-                    toAdd = ungrouped
-                        .Where(p => group.Any(g => Vector3.Distance(g.Position, p.Position) <= groupDistanceThreshold))
-                        .ToList();
-
-                    toAdd.ToList().ForEach(p =>
-                    {
-                        ungrouped.Remove(p);
-                        group.Add(p);
-                    });
-                } while (toAdd.Any());
-
-                // Assign group ID to all members if group has 2+ players, otherwise leave -1 (solo)
-                if (group.Count > 1)
-                {
-                    group.ForEach(p =>
-                    {
-                        groups[p.Id] = groupId;
-                        p.AssignGroup(groupId);
-                    });
-                    groupId++;
+                    if (Vector3.Distance(allNodes[ids[i]], allNodes[ids[j]]) <= groupDistanceThreshold)
+                        Union(ids[i], ids[j]);
                 }
             }
+
+            // Build components (excluding LocalPlayer for now)
+            var components = new Dictionary<int, List<ObservedPlayer>>();
+            foreach (var p in players)
+            {
+                var root = Find(p.Id);
+                if (!components.TryGetValue(root, out var list))
+                    components[root] = list = [];
+                list.Add(p);
+            }
+
+            // Assign group IDs
+            int nextGroupId = 1;
+            var localRoot = Find(localId);
+
+            foreach (var component in components.Values)
+            {
+                ct.ThrowIfCancellationRequested();
+
+                // Check if LocalPlayer is in this cluster (compare roots directly)
+                var componentRoot = Find(component[0].Id);
+                bool containsLocal = componentRoot == localRoot;
+
+                if (containsLocal)
+                {
+                    // Teammate cluster - assign even if solo
+                    foreach (var p in component)
+                    {
+                        newGroups[p.Id] = AbstractPlayer.TeammateGroupId;
+                        p.AssignTeammate();
+                    }
+                    continue;
+                }
+
+                // Hostile clusters must have at least 2 players
+                if (component.Count < 2)
+                    continue;
+
+                int groupId = nextGroupId++;
+
+                foreach (var p in component)
+                {
+                    newGroups[p.Id] = groupId;
+                    p.AssignGroup(groupId);
+                }
+            }
+
+            // Atomic replacement - swap the entire dict reference
+            Config.Cache.Groups[raidId] = newGroups;
         }
 
         private void RefreshEquipment(CancellationToken ct)
@@ -463,7 +509,7 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld
 
         private void RefreshQuestHelper(CancellationToken ct)
         {
-            if (Program.Config.QuestHelper.Enabled)
+            if (Config.QuestHelper.Enabled)
             {
                 QuestManager.Refresh(ct);
             }
