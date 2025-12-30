@@ -359,6 +359,12 @@ namespace LoneEftDmaRadar
         /// </summary>
         [JsonPropertyName("showExfils")]
         public bool ShowExfils { get; set; } = true;
+
+        /// <summary>
+        /// Show the target's in-hands item name under their map marker.
+        /// </summary>
+        [JsonPropertyName("showInHandsOnMap")]
+        public bool ShowInHandsOnMap { get; set; }
     }
 
     public sealed class LootConfig

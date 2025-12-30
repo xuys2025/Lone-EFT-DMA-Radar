@@ -30,29 +30,39 @@ namespace LoneEftDmaRadar.UI.Skia
 {
     internal static class SKFonts
     {
+        private static readonly Lock _lock = new();
+
         /// <summary>
         /// Regular body font (size 12) with default typeface.
         /// </summary>
-        public static SKFont UIRegular { get; } = new SKFont(CustomFonts.NeoSansStdRegular, 12f)
-        {
-            Subpixel = true,
-            Edging = SKFontEdging.SubpixelAntialias
-        };
+        public static SKFont UIRegular { get; private set; } = CreateFont(CustomFonts.NeoSansStdRegular, 12f);
         /// <summary>
         /// Large header font (size 48) for radar status.
         /// </summary>
-        public static SKFont UILarge { get; } = new SKFont(CustomFonts.NeoSansStdRegular, 48f)
-        {
-            Subpixel = true,
-            Edging = SKFontEdging.SubpixelAntialias
-        };
+        public static SKFont UILarge { get; private set; } = CreateFont(CustomFonts.NeoSansStdRegular, 48f);
         /// <summary>
         /// Regular body font (size 9) with default typeface.
         /// </summary>
-        public static SKFont AimviewWidgetFont { get; } = new SKFont(CustomFonts.NeoSansStdRegular, 9f)
+        public static SKFont AimviewWidgetFont { get; private set; } = CreateFont(CustomFonts.NeoSansStdRegular, 9f);
+
+        public static void ApplyLanguage(string language)
         {
-            Subpixel = true,
-            Edging = SKFontEdging.SubpixelAntialias
-        };
+            var typeface = CustomFonts.GetUiTypefaceForLanguage(language);
+            lock (_lock)
+            {
+                UIRegular = CreateFont(typeface, 12f);
+                UILarge = CreateFont(typeface, 48f);
+                AimviewWidgetFont = CreateFont(typeface, 9f);
+            }
+        }
+
+        private static SKFont CreateFont(SKTypeface typeface, float size)
+        {
+            return new SKFont(typeface, size)
+            {
+                Subpixel = true,
+                Edging = SKFontEdging.SubpixelAntialias
+            };
+        }
     }
 }

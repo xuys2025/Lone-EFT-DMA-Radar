@@ -35,6 +35,14 @@ namespace LoneEftDmaRadar.UI.Skia
         /// </summary>
         public static SKTypeface NeoSansStdRegular { get; }
 
+        public static SKTypeface GetUiTypefaceForLanguage(string language)
+        {
+            if (IsChineseLanguage(language) && TryGetChineseSystemTypeface(out var chinese))
+                return chinese;
+
+            return NeoSansStdRegular;
+        }
+
         static CustomFonts()
         {
             try
@@ -51,6 +59,56 @@ namespace LoneEftDmaRadar.UI.Skia
             {
                 throw new InvalidOperationException("ERROR Loading Custom Fonts!", ex);
             }
+        }
+
+        private static bool IsChineseLanguage(string language)
+        {
+            if (string.IsNullOrWhiteSpace(language))
+                return false;
+            language = language.Trim();
+            return language.StartsWith("zh", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool TryGetChineseSystemTypeface(out SKTypeface typeface)
+        {
+            // Prefer Windows system fonts with broad CJK coverage.
+            // We avoid bundling a large CJK font file to keep the repo light.
+            string[] candidates =
+            [
+                "Microsoft YaHei UI",
+                "Microsoft YaHei",
+                "SimHei",
+                "SimSun",
+                "NSimSun",
+                "PingFang SC",
+                "Noto Sans CJK SC",
+                "Source Han Sans SC"
+            ];
+
+            foreach (var family in candidates)
+            {
+                try
+                {
+                    var tf = SKTypeface.FromFamilyName(family);
+                    if (tf is null)
+                        continue;
+
+                    // Basic sanity check: can it render a common CJK glyph?
+                    var glyphs = tf.GetGlyphs("中");
+                    if (glyphs is { Length: > 0 } && glyphs[0] != 0)
+                    {
+                        typeface = tf;
+                        return true;
+                    }
+                }
+                catch
+                {
+                    // Try next
+                }
+            }
+
+            typeface = null!;
+            return false;
         }
     }
 }

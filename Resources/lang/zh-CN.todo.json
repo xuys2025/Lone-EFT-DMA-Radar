@@ -75,6 +75,8 @@
     "Enable Quest Helper": "启用任务助手",
     "Enable UPnP": "启用 UPnP",
     "Enabled": "启用",
+    "Show In Hands on Map": "地图显示手持物品",
+    "Display target's in-hands item name under the marker": "在地图目标点下方显示目标手持物品名称",
     "Enter color as hex code (e.g., #FF0000)": "以十六进制输入颜色（例如 #FF0000）",
     "Enter the name of the new loot filter:": "输入新战利品过滤器名称：",
     "Enter the new filter name:": "输入新的过滤器名称：",

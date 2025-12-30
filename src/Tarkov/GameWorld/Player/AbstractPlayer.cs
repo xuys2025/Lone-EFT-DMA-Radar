@@ -633,8 +633,17 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
                             ? null
                             : $" ({observed.HealthStatus})"; // Only display abnormal health status
                     }
-                    lines.Add($"{important}{level}{name}{health}");
-                    lines.Add($"H: {height:n0} D: {dist:n0}");
+                    string nameLine = $"{important}{level}{name}{health}";
+                    nameLine += $" ({dist:n0}m)";
+                    lines.Add(nameLine);
+                    lines.Add($"H: {height:n0}");
+
+                    if (Config.UI.ShowInHandsOnMap && observed?.Equipment?.InHands is not null)
+                    {
+                        string inHands = observed.Equipment.InHands.ShortName;
+                        if (!string.IsNullOrWhiteSpace(inHands))
+                            lines.Add(TrimMapLabel(inHands, maxLen: 24));
+                    }
 
                     DrawPlayerText(canvas, point, lines);
                 }
@@ -643,6 +652,15 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
             {
                 Logging.WriteLine($"WARNING! Player Draw Error: {ex}");
             }
+        }
+
+        private static string TrimMapLabel(string text, int maxLen)
+        {
+            if (string.IsNullOrEmpty(text))
+                return text;
+            if (maxLen <= 1)
+                return text[..1];
+            return text.Length > maxLen ? text[..(maxLen - 1)] + "…" : text;
         }
 
         /// <summary>
@@ -673,9 +691,16 @@ namespace LoneEftDmaRadar.Tarkov.GameWorld.Player
 
             if (aimlineLength > 0)
             {
+                // Draw aimlines thinner; avoid scaling stroke width up with UI scale.
+                float invScale = 1f / Math.Max(0.001f, scale);
+                using var aimOutline = SKPaints.ShapeOutline.Clone();
+                aimOutline.StrokeWidth = SKPaints.ShapeOutline.StrokeWidth * invScale * 0.85f;
+                using var aimPaint = _paints.Item1.Clone();
+                aimPaint.StrokeWidth = _paints.Item1.StrokeWidth * invScale * 0.85f;
+
                 // Draw line from nose tip forward
-                canvas.DrawLine(PP_NOSE_X, 0, PP_NOSE_X + aimlineLength, 0, SKPaints.ShapeOutline); // outline
-                canvas.DrawLine(PP_NOSE_X, 0, PP_NOSE_X + aimlineLength, 0, _paints.Item1);
+                canvas.DrawLine(PP_NOSE_X, 0, PP_NOSE_X + aimlineLength, 0, aimOutline); // outline
+                canvas.DrawLine(PP_NOSE_X, 0, PP_NOSE_X + aimlineLength, 0, aimPaint);
             }
 
             canvas.Restore();

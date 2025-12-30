@@ -134,6 +134,7 @@ namespace LoneEftDmaRadar.UI.Panels
                 {
                     Config.UI.Language = langIndex == 1 ? "zh-CN" : "en";
                     Loc.SetLanguage(Config.UI.Language ?? string.Empty);
+                    SKFonts.ApplyLanguage(Config.UI.Language ?? string.Empty);
                     _containerEntriesDirty = true;
                     TarkovDataManager.RequestReloadForCurrentLanguage(refreshFromWeb: true);
                 }
@@ -297,6 +298,14 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Draw lines between grouped players"));
+
+                bool showInHandsOnMap = Program.Config.UI.ShowInHandsOnMap;
+                if (ImGui.Checkbox(Loc.T("Show In Hands on Map"), ref showInHandsOnMap))
+                {
+                    Program.Config.UI.ShowInHandsOnMap = showInHandsOnMap;
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.T("Display target's in-hands item name under the marker"));
 
                 ImGui.SeparatorText(Loc.T("Misc"));
 

@@ -83,6 +83,7 @@ namespace LoneEftDmaRadar
                 Config = EftDmaConfig.Load();
                 Loc.SetLanguage(Config.UI.Language ?? string.Empty);
                 Loc.Initialize();
+                SKFonts.ApplyLanguage(Config.UI.Language ?? string.Empty);
                 ServiceProvider = BuildServiceProvider();
                 HttpClientFactory = ServiceProvider.GetRequiredService<IHttpClientFactory>();
                 SetHighPerformanceMode();
