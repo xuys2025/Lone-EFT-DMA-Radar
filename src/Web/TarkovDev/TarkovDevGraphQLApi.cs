@@ -36,6 +36,20 @@ namespace LoneEftDmaRadar.Web.TarkovDev
 {
     internal static class TarkovDevGraphQLApi
     {
+        internal static string GetLanguageCodeForCurrentUi()
+        {
+            // tarkov.dev uses GraphQL enum values (no hyphens). User-facing config is "zh-CN" / "en".
+            var uiLanguage = Program.Config?.UI?.Language ?? string.Empty;
+            if (string.Equals(uiLanguage, "zh-CN", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(uiLanguage, "zh", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(uiLanguage, "zh-Hans", StringComparison.OrdinalIgnoreCase))
+            {
+                return "zh";
+            }
+
+            return "en";
+        }
+
         internal static void Configure(IServiceCollection services)
         {
             services.AddHttpClient(nameof(TarkovDevGraphQLApi), client =>
@@ -125,12 +139,13 @@ namespace LoneEftDmaRadar.Web.TarkovDev
 
         private static async Task<HttpResponseMessage> QueryTarkovDevAsync()
         {
+            var lang = GetLanguageCodeForCurrentUi();
             var query = new Dictionary<string, string>
             {
                 { "query",
-                """
+                $$"""
                 {
-                    maps {
+                    maps(lang: {{lang}}) {
                         name
                         nameId
                         extracts {
@@ -147,7 +162,7 @@ namespace LoneEftDmaRadar.Web.TarkovDev
                             position { x, y, z }
                         }
                     }
-                    items {
+                    items(lang: {{lang}}) {
                         id
                         name
                         shortName
@@ -162,12 +177,12 @@ namespace LoneEftDmaRadar.Web.TarkovDev
                         historicalPrices { price }
                         categories { name }
                     }
-                    lootContainers {
+                    lootContainers(lang: {{lang}}) {
                         id
                         normalizedName
                         name
                     }
-                    tasks {
+                    tasks(lang: {{lang}}) {
                         id
                         name
                         objectives {

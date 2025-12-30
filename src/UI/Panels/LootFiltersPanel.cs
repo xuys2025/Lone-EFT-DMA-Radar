@@ -43,6 +43,7 @@ namespace LoneEftDmaRadar.UI.Panels
         // Panel-local state
         private static List<TarkovMarketItem> _allItems;
         private static List<TarkovMarketItem> _filteredItems;
+        private static volatile bool _itemsDirty;
         private static string _itemSearchText = string.Empty;
         private static int _selectedItemIndex = -1;
         private static int _selectedFilterIndex = 0;
@@ -82,12 +83,41 @@ namespace LoneEftDmaRadar.UI.Panels
         /// </summary>
         public static void Initialize()
         {
-            _allItems = TarkovDataManager.AllItems.Values.OrderBy(x => x.Name).ToList();
-            _filteredItems = new List<TarkovMarketItem>(_allItems);
+            TarkovDataManager.DataUpdated -= OnTarkovDataUpdated;
+            TarkovDataManager.DataUpdated += OnTarkovDataUpdated;
+
+            RebuildItemLists();
             RefreshFilterIndex();
             RefreshCurrentFilterEntries();
             UpdateFilterColorFromCurrent();
             RefreshLootFilter();
+        }
+
+        private static void OnTarkovDataUpdated() => _itemsDirty = true;
+
+        private static void RebuildItemLists()
+        {
+            _allItems = TarkovDataManager.AllItems.Values.OrderBy(x => x.Name).ToList();
+
+            // Try to preserve the current selection across rebuilds.
+            string selectedId = null;
+            if (_filteredItems is not null && _selectedItemIndex >= 0 && _selectedItemIndex < _filteredItems.Count)
+            {
+                selectedId = _filteredItems[_selectedItemIndex].BsgId;
+            }
+
+            FilterItems();
+
+            if (!string.IsNullOrWhiteSpace(selectedId) && _filteredItems?.Count > 0)
+            {
+                int idx = _filteredItems.FindIndex(x => string.Equals(x.BsgId, selectedId, StringComparison.OrdinalIgnoreCase));
+                if (idx >= 0)
+                {
+                    _selectedItemIndex = idx;
+                }
+            }
+
+            _itemsDirty = false;
         }
 
         private static void RefreshFilterNames()
@@ -131,6 +161,11 @@ namespace LoneEftDmaRadar.UI.Panels
         /// </summary>
         public static void Draw()
         {
+            if (_itemsDirty)
+            {
+                RebuildItemLists();
+            }
+
             ImGui.SeparatorText(Loc.T("Filter Selection"));
 
             // Filter dropdown

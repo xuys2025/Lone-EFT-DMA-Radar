@@ -37,10 +37,36 @@ namespace LoneEftDmaRadar.Tarkov
     /// </summary>
     public static class TarkovDataManager
     {
-        private const string DATA_FILE = "data.json";
-        private static readonly FileInfo _dataFile = new(Path.Combine(Program.ConfigPath.FullName, DATA_FILE));
-        private static readonly FileInfo _tempDataFile = new(Path.Combine(Program.ConfigPath.FullName, DATA_FILE + ".tmp"));
-        private static readonly FileInfo _bakDataFile = new(Path.Combine(Program.ConfigPath.FullName, DATA_FILE + ".bak"));
+        public static event Action DataUpdated;
+
+        private static string GetDataFileName() => $"data.{TarkovDevGraphQLApi.GetLanguageCodeForCurrentUi()}.json";
+        private static FileInfo GetDataFile() => new(Path.Combine(Program.ConfigPath.FullName, GetDataFileName()));
+        private static FileInfo GetTempDataFile() => new(Path.Combine(Program.ConfigPath.FullName, GetDataFileName() + ".tmp"));
+        private static FileInfo GetBakDataFile() => new(Path.Combine(Program.ConfigPath.FullName, GetDataFileName() + ".bak"));
+
+        /// <summary>
+        /// Reloads Tarkov.dev data for the current UI language without restarting.
+        /// Loads from disk immediately (if available) and optionally refreshes from web in the background.
+        /// </summary>
+        public static void RequestReloadForCurrentLanguage(bool refreshFromWeb = true)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await LoadDiskDataAsync();
+                }
+                catch
+                {
+                    // Ignore; LoadDiskDataAsync already has failover to default data.
+                }
+
+                if (refreshFromWeb)
+                {
+                    _ = Task.Run(LoadRemoteDataAsync);
+                }
+            });
+        }
 
         /// <summary>
         /// Master items dictionary - mapped via BSGID String.
@@ -81,7 +107,7 @@ namespace LoneEftDmaRadar.Tarkov
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException($"ERROR loading Game/Loot Data ({_dataFile.Name})", ex);
+                throw new InvalidOperationException($"ERROR loading Game/Loot Data ({GetDataFileName()})", ex);
             }
         }
 
@@ -96,9 +122,10 @@ namespace LoneEftDmaRadar.Tarkov
         /// <returns></returns>
         private static async Task LoadDataAsync()
         {
-            if (_dataFile.Exists)
+            var dataFile = GetDataFile();
+            if (dataFile.Exists)
             {
-                DateTime lastWriteTime = File.GetLastWriteTime(_dataFile.FullName);
+                DateTime lastWriteTime = File.GetLastWriteTime(dataFile.FullName);
                 await LoadDiskDataAsync();
                 if (lastWriteTime < DateTime.Now.Subtract(TimeSpan.FromHours(4))) // only update every 4h
                 {
@@ -158,6 +185,8 @@ namespace LoneEftDmaRadar.Tarkov
             var maps = data.Maps.ToDictionary(x => x.NameId, StringComparer.OrdinalIgnoreCase) ??
                 new Dictionary<string, TarkovDevTypes.MapElement>(StringComparer.OrdinalIgnoreCase);
             MapData = maps.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+
+            DataUpdated?.Invoke();
         }
 
         /// <summary>
@@ -183,12 +212,16 @@ namespace LoneEftDmaRadar.Tarkov
         /// <exception cref="InvalidOperationException"></exception>
         private static async Task LoadDiskDataAsync()
         {
-            var data = await TryLoadFromDiskAsync(_tempDataFile) ??
-                await TryLoadFromDiskAsync(_dataFile) ??
-                await TryLoadFromDiskAsync(_bakDataFile);
+            var tempDataFile = GetTempDataFile();
+            var dataFile = GetDataFile();
+            var bakDataFile = GetBakDataFile();
+
+            var data = await TryLoadFromDiskAsync(tempDataFile) ??
+                await TryLoadFromDiskAsync(dataFile) ??
+                await TryLoadFromDiskAsync(bakDataFile);
             if (data is null) // Internal soft failover
             {
-                _dataFile.Delete();
+                dataFile.Delete();
                 await LoadDefaultDataAsync();
                 return;
             }
@@ -220,27 +253,31 @@ namespace LoneEftDmaRadar.Tarkov
         {
             try
             {
+                var tempDataFile = GetTempDataFile();
+                var dataFile = GetDataFile();
+                var bakDataFile = GetBakDataFile();
+
                 var data = await TarkovDevGraphQLApi.GetTarkovDataAsync();
                 ArgumentNullException.ThrowIfNull(data, nameof(data));
                 var dataJson = JsonSerializer.Serialize(data, AppJsonContext.Default.DataElement);
-                await File.WriteAllTextAsync(_tempDataFile.FullName, dataJson);
-                if (_dataFile.Exists)
+                await File.WriteAllTextAsync(tempDataFile.FullName, dataJson);
+                if (dataFile.Exists)
                 {
                     File.Replace(
-                        sourceFileName: _tempDataFile.FullName,
-                        destinationFileName: _dataFile.FullName,
-                        destinationBackupFileName: _bakDataFile.FullName,
+                        sourceFileName: tempDataFile.FullName,
+                        destinationFileName: dataFile.FullName,
+                        destinationBackupFileName: bakDataFile.FullName,
                         ignoreMetadataErrors: true);
                 }
                 else
                 {
                     File.Copy(
-                        sourceFileName: _tempDataFile.FullName,
-                        destFileName: _bakDataFile.FullName,
+                        sourceFileName: tempDataFile.FullName,
+                        destFileName: bakDataFile.FullName,
                         overwrite: true);
                     File.Move(
-                        sourceFileName: _tempDataFile.FullName,
-                        destFileName: _dataFile.FullName,
+                        sourceFileName: tempDataFile.FullName,
+                        destFileName: dataFile.FullName,
                         overwrite: true);
                 }
                 SetData(data);

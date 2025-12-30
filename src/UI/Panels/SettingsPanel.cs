@@ -43,6 +43,7 @@ namespace LoneEftDmaRadar.UI.Panels
     internal static class SettingsPanel
     {
         private static List<StaticContainerEntry> _containerEntries;
+        private static volatile bool _containerEntriesDirty;
 
         // Panel-local state for tracking window open/close
         private static bool _isOpen;
@@ -63,14 +64,25 @@ namespace LoneEftDmaRadar.UI.Panels
         /// </summary>
         public static void Initialize()
         {
+            TarkovDataManager.DataUpdated -= OnTarkovDataUpdated;
+            TarkovDataManager.DataUpdated += OnTarkovDataUpdated;
+
             // Initialize container entries from TarkovDataManager
+            RebuildContainerEntries();
+
+            // Apply UI scale from config at startup
+            UpdateScaleValues(Config.UI.UIScale);
+        }
+
+        private static void OnTarkovDataUpdated() => _containerEntriesDirty = true;
+
+        private static void RebuildContainerEntries()
+        {
             _containerEntries = TarkovDataManager.AllContainers.Values
                 .OrderBy(x => x.Name)
                 .Select(x => new StaticContainerEntry(x))
                 .ToList();
-
-            // Apply UI scale from config at startup
-            UpdateScaleValues(Config.UI.UIScale);
+            _containerEntriesDirty = false;
         }
 
         /// <summary>
@@ -78,6 +90,11 @@ namespace LoneEftDmaRadar.UI.Panels
         /// </summary>
         public static void Draw()
         {
+            if (_containerEntriesDirty)
+            {
+                RebuildContainerEntries();
+            }
+
             bool isOpen = _isOpen;
             if (!ImGui.Begin(Loc.Title("Settings"), ref isOpen, ImGuiWindowFlags.AlwaysAutoResize))
             {
@@ -117,6 +134,8 @@ namespace LoneEftDmaRadar.UI.Panels
                 {
                     Config.UI.Language = langIndex == 1 ? "zh-CN" : "en";
                     Loc.SetLanguage(Config.UI.Language ?? string.Empty);
+                    _containerEntriesDirty = true;
+                    TarkovDataManager.RequestReloadForCurrentLanguage(refreshFromWeb: true);
                 }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Switch UI language between English and Chinese"));

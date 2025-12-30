@@ -88,6 +88,32 @@ namespace LoneEftDmaRadar.UI.Localization
                 var loaded = JsonSerializer.Deserialize(json, AppJsonContext.Default.DictionaryStringString) ??
                              new Dictionary<string, string>();
 
+                if (string.Equals(CurrentLanguage, "zh-CN", StringComparison.OrdinalIgnoreCase) &&
+                    TryLoadEmbeddedDefaultTranslations(out var embeddedDefaults) &&
+                    embeddedDefaults.Count > 0)
+                {
+                    bool changed = false;
+                    foreach (var kvp in embeddedDefaults)
+                    {
+                        if (!loaded.TryGetValue(kvp.Key, out var existing) || string.IsNullOrWhiteSpace(existing))
+                        {
+                            if (!string.IsNullOrWhiteSpace(kvp.Value))
+                            {
+                                loaded[kvp.Key] = kvp.Value;
+                                changed = true;
+                            }
+                        }
+                    }
+
+                    if (changed)
+                    {
+                        string mergedJson = JsonSerializer.Serialize(
+                            loaded,
+                            AppJsonContext.Default.DictionaryStringString);
+                        File.WriteAllText(file.FullName, mergedJson);
+                    }
+                }
+
                 lock (_lock)
                 {
                     _translations = new Dictionary<string, string>(loaded, StringComparer.Ordinal);
@@ -123,6 +149,35 @@ namespace LoneEftDmaRadar.UI.Localization
             }
             catch
             {
+                return false;
+            }
+        }
+
+        private static bool TryLoadEmbeddedDefaultTranslations(out Dictionary<string, string> translations)
+        {
+            translations = new Dictionary<string, string>();
+            try
+            {
+                var asm = Assembly.GetExecutingAssembly();
+                const string resourceName = "LoneEftDmaRadar.Resources.lang.zh-CN.json";
+                using var stream = asm.GetManifestResourceStream(resourceName);
+                if (stream is null)
+                    return false;
+
+                using var reader = new StreamReader(stream);
+                string json = reader.ReadToEnd();
+                if (string.IsNullOrWhiteSpace(json))
+                    return false;
+
+                translations = JsonSerializer.Deserialize(
+                                   json,
+                                   AppJsonContext.Default.DictionaryStringString) ??
+                               new Dictionary<string, string>();
+                return true;
+            }
+            catch
+            {
+                translations = new Dictionary<string, string>();
                 return false;
             }
         }

@@ -29,6 +29,7 @@ SOFTWARE.
 global using LoneEftDmaRadar.DMA;
 using Collections.Pooled;
 using LoneEftDmaRadar.Tarkov.GameWorld;
+using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.Tarkov.GameWorld.Exits;
 using LoneEftDmaRadar.Tarkov.GameWorld.Explosives;
 using LoneEftDmaRadar.Tarkov.GameWorld.Loot;
@@ -132,8 +133,13 @@ namespace LoneEftDmaRadar.DMA
                     }
                     catch (Exception ex)
                     {
+                        string header =
+                            $"{Loc.T("WARNING")}: {Loc.T("Failed to initialize InputManager (win32)")}. " +
+                            $"{Loc.T("Please note, this only works on Windows 11 (Game PC)")}. " +
+                            $"{Loc.T("Startup will continue without hotkeys")}.";
+
                         MessageBox.Show(
-                            messageBoxText: $"WARNING: Failed to initialize InputManager (win32). Please note, this only works on Windows 11 (Game PC). Startup will continue without hotkeys.\n\n{ex}",
+                            messageBoxText: $"{header}\n\n{ex}",
                             caption: Program.Name,
                             button: MessageBoxButton.OK,
                             icon: MessageBoxImage.Warning,
