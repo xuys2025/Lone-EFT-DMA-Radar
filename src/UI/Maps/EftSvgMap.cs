@@ -213,7 +213,7 @@ namespace LoneEftDmaRadar.UI.Maps
             /// Rasterization scale factor for higher quality when zoomed in.
             /// 2x provides good quality for most zoom levels without excessive memory usage.
             /// </summary>
-            internal const float RasterScale = 2f;
+            internal const float RasterScale = 2.0f;
 
             /// <summary>
             /// The pre-rasterized bitmap image for this layer.

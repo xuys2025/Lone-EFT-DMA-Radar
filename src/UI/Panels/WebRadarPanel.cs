@@ -200,7 +200,7 @@ namespace LoneEftDmaRadar.UI.Panels
 
                 _isRunning = true;
                 _startButtonState = StartButtonState.Running;
-                _serverUrl = $"http://dc64dcid9fd4.cloudfront.net/?host={externalIP}&port={port}&password={_password}";
+                _serverUrl = $"https://webradar.lone-dma.org/?host={externalIP}&port={port}&password={_password}";
             }
             catch (Exception ex)
             {

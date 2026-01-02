@@ -29,8 +29,8 @@ SOFTWARE.
 using Collections.Pooled;
 using ImGuiNET;
 using LoneEftDmaRadar.Misc;
-using LoneEftDmaRadar.Tarkov.GameWorld.Player;
-using LoneEftDmaRadar.Tarkov.GameWorld.Player.Helpers;
+using LoneEftDmaRadar.Tarkov.World.Player;
+using LoneEftDmaRadar.Tarkov.World.Player.Helpers;
 using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.UI.Skia;
 

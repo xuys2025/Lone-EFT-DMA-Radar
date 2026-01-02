@@ -28,12 +28,12 @@ SOFTWARE.
 
 using Collections.Pooled;
 using ImGuiNET;
-using LoneEftDmaRadar.Tarkov.GameWorld.Exits;
-using LoneEftDmaRadar.Tarkov.GameWorld.Explosives;
-using LoneEftDmaRadar.Tarkov.GameWorld.Hazards;
-using LoneEftDmaRadar.Tarkov.GameWorld.Loot;
-using LoneEftDmaRadar.Tarkov.GameWorld.Player;
-using LoneEftDmaRadar.Tarkov.GameWorld.Quests;
+using LoneEftDmaRadar.Tarkov.World.Exits;
+using LoneEftDmaRadar.Tarkov.World.Explosives;
+using LoneEftDmaRadar.Tarkov.World.Hazards;
+using LoneEftDmaRadar.Tarkov.World.Loot;
+using LoneEftDmaRadar.Tarkov.World.Player;
+using LoneEftDmaRadar.Tarkov.World.Quests;
 using LoneEftDmaRadar.UI.ColorPicker;
 using LoneEftDmaRadar.UI.Hotkeys;
 using LoneEftDmaRadar.UI.Hotkeys.Internal;
@@ -181,17 +181,19 @@ namespace LoneEftDmaRadar.UI
                 _window.GLContext!.TryGetProcAddress(name, out var addr) ? addr : 0);
 
             _grContext = GRContext.CreateGl(glInterface);
-            _grContext.SetResourceCacheLimit(512 * 1024 * 1024); // 512 MB
+            _grContext.SetResourceCacheLimit(512 * 1024 * 1024);
 
             CreateSkiaSurface();
 
-            // --- ImGui ---
-            // NOTE: Silk.NET's ImGuiController creates its own ImGui context.
-            // Configure fonts via the onConfigureIO callback so it applies to the correct context.
-            _imgui = new ImGuiController(_gl, _window, _input, () =>
-            {
-                ImGuiFonts.TryUseChineseFont(Config.UI.UIScale);
-            });
+            // ImGuiController will setup ImGui context
+            _imgui = new ImGuiController(
+                gl: _gl,
+                view: _window,
+                input: _input
+            );
+
+            // Configure fonts AFTER the controller creates the ImGui context.
+            ImGuiFonts.TryUseChineseFont(Config.UI.UIScale);
 
             // Set IniFilename AFTER context and controller are created, then load settings
             unsafe
@@ -205,9 +207,6 @@ namespace LoneEftDmaRadar.UI
                     ImGui.LoadIniSettingsFromDisk(path);
                 }
             }
-
-            // Configure style AFTER ImGuiController is fully initialized
-            // to prevent flicker from font texture recreation
             ImGui.StyleColorsDark();
 
             // Setup mouse events on the shared input context
@@ -257,15 +256,17 @@ namespace LoneEftDmaRadar.UI
                 return;
             }
 
-            const GetPName SampleBuffersPName = (GetPName)0x80A8; // GL_SAMPLE_BUFFERS
-            const GetPName SamplesPName = (GetPName)0x80A9;       // GL_SAMPLES
-            const GetPName StencilBitsPName = (GetPName)0x0D57;   // GL_STENCIL_BITS
-
-            _gl.GetInteger(SampleBuffersPName, out int sampleBuffers);
-            _gl.GetInteger(SamplesPName, out int samples);
+            _gl.GetInteger(GetPName.SampleBuffers, out int sampleBuffers);
+            _gl.GetInteger(GetPName.Samples, out int samples);
             if (sampleBuffers == 0)
                 samples = 0;
-            _gl.GetInteger(StencilBitsPName, out int stencilBits);
+            _gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0); // bind default framebuffer
+            _gl.GetFramebufferAttachmentParameter(
+                FramebufferTarget.Framebuffer,
+                FramebufferAttachment.StencilAttachment,
+                FramebufferAttachmentParameterName.StencilSize,
+                out int stencilBits
+            );
 
             var fbInfo = new GRGlFramebufferInfo(
                 0, // default framebuffer
@@ -913,7 +914,7 @@ namespace LoneEftDmaRadar.UI
         private static IEnumerable<IMouseoverEntity> GetMouseoverItems()
         {
             var players = AllPlayers?
-                .Where(x => x is not LoneEftDmaRadar.Tarkov.GameWorld.Player.LocalPlayer && !x.HasExfild && (!LootCorpsesVisible || x.IsAlive)) ??
+                .Where(x => x is not LoneEftDmaRadar.Tarkov.World.Player.LocalPlayer && !x.HasExfild && (!LootCorpsesVisible || x.IsAlive)) ??
                 Enumerable.Empty<AbstractPlayer>();
 
             var loot = Config.Loot.Enabled ?
