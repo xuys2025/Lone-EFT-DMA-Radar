@@ -28,6 +28,7 @@ SOFTWARE.
 
 using LoneEftDmaRadar.Misc;
 using LoneEftDmaRadar.Misc.Workers;
+using LoneEftDmaRadar.Tarkov.Features;
 using LoneEftDmaRadar.Tarkov.Unity.Structures;
 using LoneEftDmaRadar.Tarkov.World.Exits;
 using LoneEftDmaRadar.Tarkov.World.Explosives;
@@ -186,6 +187,7 @@ namespace LoneEftDmaRadar.Tarkov.World
                 Memory.ThrowIfProcessNotRunning();
                 try
                 {
+                    AntiAfk.Update(); // Keep Anti-AFK active while waiting for raid
                     var instance = GetGameWorld(ct);
                     Logging.WriteLine($"Valid GameWorld Found! {instance}");
                     return instance;

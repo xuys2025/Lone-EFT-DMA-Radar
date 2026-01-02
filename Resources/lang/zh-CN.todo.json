@@ -165,6 +165,7 @@
     "Scale UI elements (text, icons, widgets)": "缩放界面元素（文字、图标、小组件）",
     "Scale:": "缩放：",
     "Scav": "Scav",
+    "Scavs": "SCAV",
     "Search for items to add to the filter": "搜索要添加到过滤器的物品",
     "Search for specific items by name": "按名称搜索指定物品",
     "Search Items": "搜索物品",
@@ -241,6 +242,10 @@
     "Removes weapon sway/breath": "移除武器晃动/呼吸",
     "Game Process Not Running!": "游戏进程未运行！",
     "Starting Up": "正在启动",
-    "Waiting for Raid Start": "等待战局开始"
+    "Waiting for Raid Start": "等待战局开始",
+    "Anti-AFK": "防挂机 (Anti-AFK)",
+    "Prevents being kicked for inactivity in menu": "防止在菜单中因长时间不活动被踢出",
+      "Always Show Map Labels": "总是显示地图标签",
+  "Always display names for Exfils, Quests, and Containers": "总是显示撤离点、任务和容器的名称"
 }
 

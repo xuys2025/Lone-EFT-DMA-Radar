@@ -75,6 +75,12 @@ namespace LoneEftDmaRadar.Tarkov.World.Exits
                 canvas.DrawCircle(point, size, SKPaints.ShapeOutline);
                 canvas.DrawCircle(point, size, paint);
             }
+
+            if (Program.Config.UI.AlwaysShowMapLabels)
+            {
+                var exfilName = Name ?? "unknown";
+                Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams).DrawMouseoverText(canvas, new[] { exfilName }, drawBackground: false);
+            }
         }
 
         public void DrawMouseover(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)

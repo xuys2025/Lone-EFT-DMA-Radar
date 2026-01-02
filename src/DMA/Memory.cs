@@ -36,6 +36,7 @@ using LoneEftDmaRadar.Tarkov.World.Explosives;
 using LoneEftDmaRadar.Tarkov.World.Loot;
 using LoneEftDmaRadar.Tarkov.World.Player;
 using LoneEftDmaRadar.Tarkov.World.Quests;
+using LoneEftDmaRadar.Tarkov.Features;
 using System.Runtime;
 using VmmSharpEx;
 using VmmSharpEx.Extensions;
@@ -274,6 +275,8 @@ namespace LoneEftDmaRadar.DMA
                             {
                                 game.LocalPlayer?.ApplyNoRecoilSway(Program.Config.Misc.NoRecoil, Program.Config.Misc.NoSway);
                             }
+
+                            AntiAfk.Update();
 
                             Thread.Sleep(133);
                         }

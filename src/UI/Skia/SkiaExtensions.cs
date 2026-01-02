@@ -229,7 +229,7 @@ namespace LoneEftDmaRadar.UI.Skia
         /// <summary>
         /// Draws Mouseover Text (with backer) on this zoomed location.
         /// </summary>
-        public static void DrawMouseoverText(this SKPoint zoomedMapPos, SKCanvas canvas, params ReadOnlySpan<string> lines)
+        public static void DrawMouseoverText(this SKPoint zoomedMapPos, SKCanvas canvas, ReadOnlySpan<string> lines, bool drawBackground = true)
         {
             if (lines.IsEmpty)
                 return;
@@ -247,14 +247,17 @@ namespace LoneEftDmaRadar.UI.Skia
                     backerSize.Width = textWidth;
             }
             // Draw Backer
-            var backer = new SKRect
+            if (drawBackground)
             {
-                Bottom = zoomedMapPos.Y + backerSize.Height,
-                Left = zoomedMapPos.X,
-                Top = zoomedMapPos.Y,
-                Right = zoomedMapPos.X + backerSize.Width
-            };
-            canvas.DrawRect(backer, SKPaints.PaintTransparentBacker); // Draw tooltip backer
+                var backer = new SKRect
+                {
+                    Bottom = zoomedMapPos.Y + backerSize.Height,
+                    Left = zoomedMapPos.X,
+                    Top = zoomedMapPos.Y,
+                    Right = zoomedMapPos.X + backerSize.Width
+                };
+                canvas.DrawRect(backer, SKPaints.PaintTransparentBacker); // Draw tooltip backer
+            }
             // Draw Lines
             zoomedMapPos.Offset(0, font.Size);
             foreach (var line in lines) // Draw tooltip text
@@ -268,6 +271,14 @@ namespace LoneEftDmaRadar.UI.Skia
                     SKPaints.TextMouseover); // draw line text
                 zoomedMapPos.Offset(0, font.Spacing);
             }
+        }
+
+        /// <summary>
+        /// Helper overload for params array
+        /// </summary>
+        public static void DrawMouseoverText(this SKPoint zoomedMapPos, SKCanvas canvas, params string[] lines)
+        {
+            DrawMouseoverText(zoomedMapPos, canvas, lines.AsSpan(), true);
         }
     }
 }

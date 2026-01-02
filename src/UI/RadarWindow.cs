@@ -33,6 +33,7 @@ using LoneEftDmaRadar.Tarkov.World.Explosives;
 using LoneEftDmaRadar.Tarkov.World.Hazards;
 using LoneEftDmaRadar.Tarkov.World.Loot;
 using LoneEftDmaRadar.Tarkov.World.Player;
+using LoneEftDmaRadar.Tarkov.World.Player.Helpers;
 using LoneEftDmaRadar.Tarkov.World.Quests;
 using LoneEftDmaRadar.UI.ColorPicker;
 using LoneEftDmaRadar.UI.Hotkeys;
@@ -427,25 +428,26 @@ namespace LoneEftDmaRadar.UI
             // Draw Map
             map.Draw(canvas, localPlayer.Position.Y, mapParams.Bounds, mapCanvasBounds);
 
-            // Draw loot
-            if (Config.Loot.Enabled)
-            {
-                if (FilteredLoot is IEnumerable<LootItem> loot)
-                {
-                    foreach (var item in loot)
-                    {
-                        item.Draw(canvas, mapParams, localPlayer);
-                    }
-                }
+            // --- LAYER 1: Low Priority (Environment, Containers, Normal Loot) ---
 
-                if (Config.Containers.Enabled && Containers is IEnumerable<StaticLootContainer> containers)
+            // Draw loot (Normal)
+            if (Config.Loot.Enabled && FilteredLoot is IEnumerable<LootItem> loot)
+            {
+                foreach (var item in loot)
                 {
-                    foreach (var container in containers)
+                    if (!item.IsImportant) // Draw normal loot first
+                        item.Draw(canvas, mapParams, localPlayer);
+                }
+            }
+
+            // Draw containers
+            if (Config.Loot.Enabled && Config.Containers.Enabled && Containers is IEnumerable<StaticLootContainer> containers)
+            {
+                foreach (var container in containers)
+                {
+                    if (Config.Containers.Selected.ContainsKey(container.ID ?? "NULL"))
                     {
-                        if (Config.Containers.Selected.ContainsKey(container.ID ?? "NULL"))
-                        {
-                            container.Draw(canvas, mapParams, localPlayer);
-                        }
+                        container.Draw(canvas, mapParams, localPlayer);
                     }
                 }
             }
@@ -486,17 +488,42 @@ namespace LoneEftDmaRadar.UI
                 }
             }
 
-            // Draw players
+            // --- LAYER 2: Medium Priority (AI Scavs) ---
             var allPlayers = AllPlayers?.Where(x => !x.HasExfild);
             if (allPlayers is not null)
             {
                 foreach (var player in allPlayers)
                 {
-                    if (player == localPlayer)
-                        continue;
-                    player.Draw(canvas, mapParams, localPlayer);
+                    if (player == localPlayer) continue;
+                    if (player.Type == PlayerType.AIScav) // Draw AI Scavs
+                        player.Draw(canvas, mapParams, localPlayer);
                 }
             }
+
+            // --- LAYER 3: High Priority (Threats, Teammates, Important Loot) ---
+
+            // Draw loot (Important)
+            if (Config.Loot.Enabled && FilteredLoot is IEnumerable<LootItem> lootImportant)
+            {
+                foreach (var item in lootImportant)
+                {
+                    if (item.IsImportant) // Draw important loot on top of scavs
+                        item.Draw(canvas, mapParams, localPlayer);
+                }
+            }
+
+            // Draw Players (PMC, Boss, Raider, Teammate, PScav)
+            if (allPlayers is not null)
+            {
+                foreach (var player in allPlayers)
+                {
+                    if (player == localPlayer) continue;
+                    if (player.Type != PlayerType.AIScav) // Draw High Priority Players
+                        player.Draw(canvas, mapParams, localPlayer);
+                }
+            }
+
+            // --- LAYER 4: Top Priority (Overlays, LocalPlayer, HUD) ---
 
             // Draw group connectors
             if (Program.Config.UI.ConnectGroups && allPlayers is not null)
@@ -509,6 +536,50 @@ namespace LoneEftDmaRadar.UI
 
             // Draw mouseover
             closestToMouse?.DrawMouseover(canvas, mapParams, localPlayer);
+
+            // Draw Player/Scav Counts
+            DrawPlayerCounts(canvas, canvasSize, allPlayers);
+        }
+
+        private static void DrawPlayerCounts(SKCanvas canvas, SKSize canvasSize, IEnumerable<AbstractPlayer> allPlayers)
+        {
+            int scavCount = 0;
+            int playerCount = 0;
+
+            if (allPlayers is not null)
+            {
+                foreach (var player in allPlayers)
+                {
+                    if (player.IsAlive)
+                    {
+                        if (player.IsHuman) playerCount++;
+                        else scavCount++;
+                    }
+                }
+            }
+
+            string pText = $"{Loc.T("Players")}: {playerCount}";
+            string sText = $"{Loc.T("Scavs")}: {scavCount}";
+
+            float padding = 10f;
+            float y = 50f + SKFonts.UIBig.Size; // Increased top padding to avoid menu overlap
+
+            // Measure text to align right
+            float pWidth = SKFonts.UIBig.MeasureText(pText);
+            float sWidth = SKFonts.UIBig.MeasureText(sText);
+            float maxWidth = Math.Max(pWidth, sWidth);
+
+            float x = canvasSize.Width - padding - maxWidth;
+
+            // Draw Players
+            canvas.DrawText(pText, x, y, SKFonts.UIBig, SKPaints.TextOutline);
+            canvas.DrawText(pText, x, y, SKFonts.UIBig, SKPaints.TextPMC);
+
+            y += SKFonts.UIBig.Spacing;
+
+            // Draw Scavs
+            canvas.DrawText(sText, x, y, SKFonts.UIBig, SKPaints.TextOutline);
+            canvas.DrawText(sText, x, y, SKFonts.UIBig, SKPaints.TextScav);
         }
 
         private static void DrawGroupConnectors(SKCanvas canvas, IEnumerable<AbstractPlayer> allPlayers, IEftMap map, EftMapParams mapParams)

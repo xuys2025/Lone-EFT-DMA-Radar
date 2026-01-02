@@ -194,19 +194,8 @@ namespace LoneEftDmaRadar.Tarkov.World.Loot
 
             point.Offset(7 * Program.Config.UI.UIScale, 3 * Program.Config.UI.UIScale);
 
-            canvas.DrawText(
-                label,
-                point,
-                SKTextAlign.Left,
-                SKFonts.UIRegular,
-                SKPaints.TextOutline); // Draw outline
-            canvas.DrawText(
-                label,
-                point,
-                SKTextAlign.Left,
-                SKFonts.UIRegular,
-                paints.Item2);
-
+            canvas.DrawText(label, point, SKTextAlign.Left, SKFonts.UIRegular, SKPaints.TextOutline);
+            canvas.DrawText(label, point, SKTextAlign.Left, SKFonts.UIRegular, paints.Item2);
         }
 
         public virtual void DrawMouseover(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)

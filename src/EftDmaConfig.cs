@@ -365,6 +365,12 @@ namespace LoneEftDmaRadar
         /// </summary>
         [JsonPropertyName("showInHandsOnMap")]
         public bool ShowInHandsOnMap { get; set; }
+
+        /// <summary>
+        /// Always show labels for Exfils, Quests, and Containers on map.
+        /// </summary>
+        [JsonPropertyName("alwaysShowMapLabels")]
+        public bool AlwaysShowMapLabels { get; set; } = false;
     }
 
     public sealed class LootConfig
@@ -558,5 +564,11 @@ namespace LoneEftDmaRadar
         /// </summary>
         [JsonPropertyName("noSway")]
         public bool NoSway { get; set; } = false;
+
+        /// <summary>
+        /// Enables Anti-AFK.
+        /// </summary>
+        [JsonPropertyName("antiAfk")]
+        public bool AntiAfk { get; set; } = false;
     }
 }

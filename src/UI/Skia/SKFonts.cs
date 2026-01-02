@@ -41,6 +41,14 @@ namespace LoneEftDmaRadar.UI.Skia
         /// </summary>
         public static SKFont UILarge { get; private set; } = CreateFont(CustomFonts.NeoSansStdRegular, 48f);
         /// <summary>
+        /// Medium font (size 18) for HUD elements.
+        /// </summary>
+        public static SKFont UIMedium { get; private set; } = CreateFont(CustomFonts.NeoSansStdRegular, 18f);
+        /// <summary>
+        /// Big font (size 26) for HUD counters.
+        /// </summary>
+        public static SKFont UIBig { get; private set; } = CreateFont(CustomFonts.NeoSansStdRegular, 26f);
+        /// <summary>
         /// Regular body font (size 9) with default typeface.
         /// </summary>
         public static SKFont AimviewWidgetFont { get; private set; } = CreateFont(CustomFonts.NeoSansStdRegular, 9f);
@@ -52,6 +60,8 @@ namespace LoneEftDmaRadar.UI.Skia
             {
                 UIRegular = CreateFont(typeface, 12f);
                 UILarge = CreateFont(typeface, 48f);
+                UIMedium = CreateFont(typeface, 18f);
+                UIBig = CreateFont(typeface, 26f);
                 AimviewWidgetFont = CreateFont(typeface, 9f);
             }
         }

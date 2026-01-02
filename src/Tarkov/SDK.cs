@@ -86,6 +86,21 @@ namespace SDK
             public const uint IntensitySeparateFactors = 0x94; // Vector3
         }
 
+        public readonly partial struct TarkovApplication
+        {
+            public const uint MenuOperation = 0x128; // object
+        }
+
+        public readonly partial struct MenuOperation
+        {
+            public const uint AfkMonitor = 0x38; // object
+        }
+
+        public readonly partial struct AfkMonitor
+        {
+            public const uint Delay = 0x10; // float
+        }
+
         public readonly partial struct ObservedPlayerView
         {
             public const uint ObservedPlayerController = 0x28; // object

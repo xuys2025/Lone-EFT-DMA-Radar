@@ -85,6 +85,14 @@ namespace LoneEftDmaRadar.Tarkov.World.Quests
                 canvas.DrawRect(point.X, point.Y,
                     squareSize, squareSize, SKPaints.PaintQuestZone);
             }
+
+            if (Program.Config.UI.AlwaysShowMapLabels)
+            {
+                using var lines = new PooledList<string>();
+                lines.Add(Name);
+                lines.Add($"Type: {Type.ToString()}");
+                Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams).DrawMouseoverText(canvas, lines.Span, drawBackground: false);
+            }
         }
 
         public void DrawMouseover(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)

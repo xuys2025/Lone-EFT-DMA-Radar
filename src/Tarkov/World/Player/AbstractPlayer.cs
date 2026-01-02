@@ -64,6 +64,9 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
 
         private static readonly SKPath _playerPill = CreatePlayerPillBase();
         private static readonly SKPath _deathMarker = CreateDeathMarkerPath();
+        private static readonly SKPaint _paintHeightPos = new SKPaint { Color = SKColors.Red, IsAntialias = true };
+        private static readonly SKPaint _paintHeightNeg = new SKPaint { Color = SKColors.DeepSkyBlue, IsAntialias = true };
+
         private const float PP_LENGTH = 9f;
         private const float PP_RADIUS = 3f;
         private const float PP_HALF_HEIGHT = PP_RADIUS * 0.85f;
@@ -599,7 +602,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
                         return;
                     var height = Position.Y - localPlayer.Position.Y;
                     var dist = Vector3.Distance(localPlayer.Position, Position);
-                    using var lines = new PooledList<string>();
+                    using var lines = new PooledList<(string, SKPaint)>();
                     var observed = this as ObservedPlayer;
                     string important = (observed is not null && observed.Equipment.CarryingImportantLoot) ?
                         "!!" : null; // Flag important loot
@@ -617,14 +620,34 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
                     }
                     string nameLine = $"{important}{level}{name}{health}";
                     nameLine += $" ({dist:n0}m)";
-                    lines.Add(nameLine);
-                    lines.Add($"H: {height:n0}");
+                    lines.Add((nameLine, null));
+
+                    string hText = $"H: {height:n0}";
+                    SKPaint hPaint = null;
+                    string arrow = "";
+
+                    if (height > 1)
+                    {
+                        hPaint = _paintHeightPos;
+                        if (height >= 8) arrow = " ▲▲▲";
+                        else if (height >= 5) arrow = " ▲▲";
+                        else arrow = " ▲";
+                    }
+                    else if (height < -1)
+                    {
+                        hPaint = _paintHeightNeg;
+                        if (height <= -8) arrow = " ▼▼▼";
+                        else if (height <= -5) arrow = " ▼▼";
+                        else arrow = " ▼";
+                    }
+
+                    lines.Add((hText + arrow, hPaint));
 
                     if (Config.UI.ShowInHandsOnMap && observed?.Equipment?.InHands is not null)
                     {
                         string inHands = observed.Equipment.InHands.ShortName;
                         if (!string.IsNullOrWhiteSpace(inHands))
-                            lines.Add(TrimMapLabel(inHands, maxLen: 24));
+                            lines.Add((TrimMapLabel(inHands, maxLen: 24), null));
                     }
 
                     DrawPlayerText(canvas, point, lines);
@@ -705,19 +728,20 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         /// <summary>
         /// Draws Player Text on this location.
         /// </summary>
-        private void DrawPlayerText(SKCanvas canvas, SKPoint point, IList<string> lines)
+        private void DrawPlayerText(SKCanvas canvas, SKPoint point, IList<(string text, SKPaint paint)> lines)
         {
             if (RadarWindow.MouseoverGroup is int grp && grp == GroupId)
                 _paints.Item2 = SKPaints.TextMouseoverGroup;
             point.Offset(9.5f * Config.UI.UIScale, 0);
-            foreach (var line in lines)
+            foreach (var (line, paint) in lines)
             {
                 if (string.IsNullOrEmpty(line?.Trim()))
                     continue;
 
+                var textPaint = paint ?? _paints.Item2;
 
                 canvas.DrawText(line, point, SKTextAlign.Left, SKFonts.UIRegular, SKPaints.TextOutline); // Draw outline
-                canvas.DrawText(line, point, SKTextAlign.Left, SKFonts.UIRegular, _paints.Item2); // draw line text
+                canvas.DrawText(line, point, SKTextAlign.Left, SKFonts.UIRegular, textPaint); // draw line text
 
                 point.Offset(0, SKFonts.UIRegular.Spacing);
             }

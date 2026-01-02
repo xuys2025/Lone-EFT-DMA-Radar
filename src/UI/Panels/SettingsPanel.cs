@@ -311,6 +311,14 @@ namespace LoneEftDmaRadar.UI.Panels
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Display target's in-hands item name under the marker"));
 
+                bool alwaysShowMapLabels = Program.Config.UI.AlwaysShowMapLabels;
+                if (ImGui.Checkbox(Loc.T("Always Show Map Labels"), ref alwaysShowMapLabels))
+                {
+                    Program.Config.UI.AlwaysShowMapLabels = alwaysShowMapLabels;
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.T("Always display names for Exfils, Quests, and Containers"));
+
                 ImGui.SeparatorText(Loc.T("Misc"));
 
                 bool autoGroups = Config.Misc.AutoGroups;
@@ -336,6 +344,14 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Removes weapon sway/breath"));
+
+                bool antiAfk = Config.Misc.AntiAfk;
+                if (ImGui.Checkbox(Loc.T("Anti-AFK"), ref antiAfk))
+                {
+                    Config.Misc.AntiAfk = antiAfk;
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.T("Prevents being kicked for inactivity in menu"));
 
                 ImGui.EndTabItem();
             }

@@ -83,6 +83,11 @@ namespace LoneEftDmaRadar.Tarkov.World.Loot
                     canvas.DrawCircle(point, size, SKPaints.ShapeOutline);
                     canvas.DrawCircle(point, size, SKPaints.PaintContainerLoot);
                 }
+
+                if (Program.Config.UI.AlwaysShowMapLabels)
+                {
+                    Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams).DrawMouseoverText(canvas, new[] { Name }, drawBackground: false);
+                }
             }
         }
 
