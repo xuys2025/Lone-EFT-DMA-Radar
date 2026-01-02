@@ -30,6 +30,7 @@ using LoneEftDmaRadar.Tarkov.Unity.Collections;
 using LoneEftDmaRadar.Tarkov.Unity.Structures;
 using LoneEftDmaRadar.Tarkov.World.Player.Helpers;
 using VmmSharpEx.Scatter;
+using LoneEftDmaRadar.Tarkov; // For MongoID
 
 namespace LoneEftDmaRadar.Tarkov.World.Player
 {
@@ -80,6 +81,11 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         /// </summary>
         public Enums.ETagStatus HealthStatus { get; private set; } = Enums.ETagStatus.Healthy;
 
+        /// <summary>
+        /// AI Voice line key (Debug).
+        /// </summary>
+        public string Voice { get; private set; }
+
         internal ObservedPlayer(ulong playerBase) : base(playerBase)
         {
             var localPlayer = Memory.LocalPlayer;
@@ -117,9 +123,16 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
                 {
                     var voicePtr = Memory.ReadPtr(this + Offsets.ObservedPlayerView.Voice);
                     string voice = Memory.ReadUnityString(voicePtr);
+                    Voice = voice;
                     var role = GetAIRoleInfo(voice);
                     Name = role.Name;
                     Type = role.Type;
+
+                    if (Name == "Priest" && IsSanta())
+                    {
+                        Name = "Santa";
+                        // Type is already AIBoss
+                    }
                 }
                 else
                 {
@@ -187,6 +200,49 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         private int GetPlayerId()
         {
             return Memory.ReadValueEnsure<int>(this + Offsets.ObservedPlayerView.Id);
+        }
+
+        /// <summary>
+        /// Checks if the player is wearing Santa gear (Hat or Bag).
+        /// </summary>
+        private bool IsSanta()
+        {
+            try
+            {
+                var inventorycontroller = Memory.ReadPtr(InventoryControllerAddr);
+                var inventory = Memory.ReadPtr(inventorycontroller + Offsets.InventoryController.Inventory);
+                var equipment = Memory.ReadPtr(inventory + Offsets.Inventory.Equipment);
+                var slotsPtr = Memory.ReadPtr(equipment + Offsets.InventoryEquipment._cachedSlots);
+
+                if (slotsPtr == 0) return false;
+
+                using var slotsArray = UnityArray<ulong>.Create(slotsPtr, true);
+                foreach (var slotPtr in slotsArray)
+                {
+                    var namePtr = Memory.ReadPtr(slotPtr + Offsets.Slot.ID);
+                    var name = Memory.ReadUnityString(namePtr);
+
+                    if (string.Equals(name, "Headwear", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(name, "Backpack", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var containedItem = Memory.ReadPtr(slotPtr + Offsets.Slot.ContainedItem);
+                        if (containedItem == 0) continue;
+
+                        var template = Memory.ReadPtr(containedItem + Offsets.LootItem.Template);
+                        var mongoId = Memory.ReadValue<MongoID>(template + Offsets.ItemTemplate._id);
+                        var id = mongoId.ReadString();
+
+                        if (id == "5a43957686f7742a2c2f11b0" || // Santa Hat
+                            id == "61b9e1aaef9a1b5d6a79899a" || // Santa Bag
+                            id == "5a43943586f77416ad2f06e2")   // Ded Moroz Hat
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+            catch { }
+            return false;
         }
 
         /// <summary>

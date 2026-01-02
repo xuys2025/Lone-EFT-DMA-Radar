@@ -231,10 +231,13 @@ namespace LoneEftDmaRadar.UI
             ColorPickerPanel.Initialize();
             SettingsPanel.Initialize();
             LootFiltersPanel.Initialize();
+            _memWritingPanel = new MemWritingPanel(Config);
 
             // Initialize widgets
             InitializeWidgets();
         }
+
+        private static MemWritingPanel _memWritingPanel;
 
         private static void InitializeWidgets()
         {
@@ -745,6 +748,10 @@ namespace LoneEftDmaRadar.UI
             {
                 DrawLootFiltersWindow();
             }
+
+            // Memory Writing Panel (Always visible, collapsible)
+            _memWritingPanel.Render();
+
 
             // Web Radar Window
             if (_isWebRadarOpen)

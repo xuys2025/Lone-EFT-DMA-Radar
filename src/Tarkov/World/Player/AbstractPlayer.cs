@@ -535,6 +535,8 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
             ["BossBully"] = new() { Name = "Reshala", Type = PlayerType.AIBoss },
             ["BossGluhar"] = new() { Name = "Gluhar", Type = PlayerType.AIBoss },
             ["SectantPriest"] = new() { Name = "Priest", Type = PlayerType.AIBoss },
+            ["DedMoroz"] = new() { Name = "Santa", Type = PlayerType.AIBoss },
+            ["Gifts"] = new() { Name = "Santa", Type = PlayerType.AIBoss },
             ["SectantWarrior"] = new() { Name = "Cultist", Type = PlayerType.AIRaider },
             ["BossKilla"] = new() { Name = "Killa", Type = PlayerType.AIBoss },
             ["BossTagilla"] = new() { Name = "Tagilla", Type = PlayerType.AIBoss },
@@ -648,6 +650,27 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
                         string inHands = observed.Equipment.InHands.ShortName;
                         if (!string.IsNullOrWhiteSpace(inHands))
                             lines.Add((TrimMapLabel(inHands, maxLen: 24), null));
+                    }
+
+                    if (observed is not null && (IsPmc || Type == PlayerType.AIBoss))
+                    {
+                        var items = observed.Equipment.Items;
+                        int headClass = 0;
+                        int bodyClass = 0;
+
+                        if (items.TryGetValue("Headwear", out var helmet))
+                            headClass = helmet.ArmorClass;
+
+                        if (items.TryGetValue("ArmorVest", out var armor))
+                            bodyClass = armor.ArmorClass;
+
+                        if (items.TryGetValue("TacticalVest", out var rig) && rig.ArmorClass > bodyClass)
+                            bodyClass = rig.ArmorClass;
+
+                        if (headClass > 0 || bodyClass > 0)
+                        {
+                            lines.Add(($"头{headClass}甲{bodyClass}", null));
+                        }
                     }
 
                     DrawPlayerText(canvas, point, lines);

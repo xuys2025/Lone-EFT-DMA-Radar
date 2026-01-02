@@ -113,7 +113,8 @@ namespace LoneEftDmaRadar.Web.TarkovDev
                     Tags = item.Categories?.Select(x => x.Name)?.Distinct().ToHashSet() ?? new(), // Flatten categories
                     TraderPrice = item.HighestVendorPrice,
                     FleaPrice = item.OptimalFleaPrice,
-                    Slots = slots
+                    Slots = slots,
+                    ArmorClass = item.Properties?.Class ?? 0
                 });
             }
             foreach (var container in query.Data.TarkovDevContainers)
@@ -176,6 +177,17 @@ namespace LoneEftDmaRadar.Web.TarkovDev
                         avg24hPrice
                         historicalPrices { price }
                         categories { name }
+                        properties {
+                            ... on ItemPropertiesArmor {
+                                class
+                            }
+                            ... on ItemPropertiesHelmet {
+                                class
+                            }
+                            ... on ItemPropertiesChestRig {
+                                class
+                            }
+                        }
                     }
                     lootContainers(lang: {{lang}}) {
                         id

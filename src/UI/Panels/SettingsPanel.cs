@@ -329,30 +329,6 @@ namespace LoneEftDmaRadar.UI.Panels
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Best-effort: automatically infer groups before raid start based on proximity"));
 
-                bool noRecoil = Config.Misc.NoRecoil;
-                if (ImGui.Checkbox(Loc.T("No Recoil"), ref noRecoil))
-                {
-                    Config.Misc.NoRecoil = noRecoil;
-                }
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(Loc.T("Removes weapon recoil"));
-
-                bool noSway = Config.Misc.NoSway;
-                if (ImGui.Checkbox(Loc.T("No Sway"), ref noSway))
-                {
-                    Config.Misc.NoSway = noSway;
-                }
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(Loc.T("Removes weapon sway/breath"));
-
-                bool antiAfk = Config.Misc.AntiAfk;
-                if (ImGui.Checkbox(Loc.T("Anti-AFK"), ref antiAfk))
-                {
-                    Config.Misc.AntiAfk = antiAfk;
-                }
-                if (ImGui.IsItemHovered())
-                    ImGui.SetTooltip(Loc.T("Prevents being kicked for inactivity in menu"));
-
                 ImGui.EndTabItem();
             }
         }

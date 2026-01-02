@@ -48,6 +48,8 @@ namespace LoneEftDmaRadar.Tarkov.World.Loot
             _position = position;
         }
 
+        public int ArmorClass => _item.ArmorClass;
+
         public LootItem(string id, string name, Vector3 position)
         {
             ArgumentNullException.ThrowIfNull(id, nameof(id));
@@ -210,6 +212,8 @@ namespace LoneEftDmaRadar.Tarkov.World.Loot
         public virtual string GetUILabel()
         {
             string label = "";
+            if (ArmorClass > 0)
+                label += $"[AC{ArmorClass}] ";
             if (Price > 0 && !IsImportant)
                 label += $"[{Utilities.FormatNumberKM(Price)}] ";
             label += ShortName;

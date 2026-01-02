@@ -69,6 +69,12 @@ namespace LoneEftDmaRadar.Web.TarkovDev
             public string Message { get; set; }
         }
 
+        public sealed class ItemPropertiesElement
+        {
+            [JsonPropertyName("class")]
+            public int? Class { get; set; }
+        }
+
         public sealed class ItemElement
         {
             [JsonPropertyName("id")]
@@ -94,6 +100,9 @@ namespace LoneEftDmaRadar.Web.TarkovDev
 
             [JsonPropertyName("categories")]
             public List<CategoryElement> Categories { get; set; }
+
+            [JsonPropertyName("properties")]
+            public ItemPropertiesElement Properties { get; set; }
 
             [JsonPropertyName("sellFor")]
             public List<SellForElement> SellFor { get; set; }
