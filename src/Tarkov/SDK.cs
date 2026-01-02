@@ -53,6 +53,7 @@ namespace SDK
         public readonly partial struct Player
         {
             public const uint MovementContext = 0x60; // object
+            public const uint ProceduralWeaponAnimation = 0x338; // object
             public const uint _playerBody = 0x190; // object
             public const uint Corpse = 0x680; // object
             public const uint Location = 0x870; // string
@@ -60,6 +61,29 @@ namespace SDK
             public const uint Profile = 0x900; // object
             public const uint _handsController = 0x980; // object
             public const uint _playerLookRaycastTransform = 0xA08; // object
+        }
+
+        public readonly partial struct ProceduralWeaponAnimation
+        {
+            public const uint Mask = 0x30; // int
+            public const uint Breath = 0x38; // object (BreathEffector)
+            public const uint MotionReact = 0x48; // object (MotionEffector)
+            public const uint Shootingg = 0x58; // object (ShotEffector)
+        }
+
+        public readonly partial struct BreathEffector
+        {
+            public const uint Intensity = 0x30; // float
+        }
+
+        public readonly partial struct ShotEffector
+        {
+            public const uint NewShotRecoil = 0x20; // object (NewShotRecoil)
+        }
+
+        public readonly partial struct NewShotRecoil
+        {
+            public const uint IntensitySeparateFactors = 0x94; // Vector3
         }
 
         public readonly partial struct ObservedPlayerView

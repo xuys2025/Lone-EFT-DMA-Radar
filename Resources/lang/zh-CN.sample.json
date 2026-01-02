@@ -15,5 +15,10 @@
   "Color Picker": "颜色选择",
   "Restart Radar": "重启雷达",
   "Backup Config": "备份配置",
-  "Open Config Folder": "打开配置文件夹"
+  "Open Config Folder": "打开配置文件夹",
+
+  "No Recoil": "无后座",
+  "Removes weapon recoil": "移除武器后座力",
+  "No Sway": "无晃动",
+  "Removes weapon sway/breath": "移除武器晃动/呼吸"
 }

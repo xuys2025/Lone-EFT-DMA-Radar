@@ -109,7 +109,7 @@ namespace LoneEftDmaRadar.DMA
                             Logging.WriteLine("[DMA] No MemMap, attempting to generate...");
                             _vmm = new Vmm(args: initArgs.ToArray())
                             {
-                                EnableMemoryWriting = false
+                                EnableMemoryWriting = true
                             };
                             _ = _vmm.GetMemoryMap(
                                 applyMap: true,
@@ -123,7 +123,7 @@ namespace LoneEftDmaRadar.DMA
                     }
                     _vmm ??= new Vmm(args: initArgs.ToArray())
                     {
-                        EnableMemoryWriting = false
+                        EnableMemoryWriting = true
                     };
                     _vmm.RegisterAutoRefresh(RefreshOption.MemoryPartial, TimeSpan.FromMilliseconds(300));
                     _vmm.RegisterAutoRefresh(RefreshOption.TlbPartial, TimeSpan.FromSeconds(2));
@@ -269,6 +269,12 @@ namespace LoneEftDmaRadar.DMA
                         {
                             ct.ThrowIfCancellationRequested();
                             game.Refresh();
+
+                            if (Program.Config.Misc.NoRecoil || Program.Config.Misc.NoSway)
+                            {
+                                game.LocalPlayer?.ApplyNoRecoilSway(Program.Config.Misc.NoRecoil, Program.Config.Misc.NoSway);
+                            }
+
                             Thread.Sleep(133);
                         }
                     }
@@ -591,6 +597,24 @@ namespace LoneEftDmaRadar.DMA
             var flags = useCache ? VmmFlags.NONE : VmmFlags.NOCACHE;
             return _vmm.MemReadString(_pid, addr + 0x14, cb, Encoding.Unicode, flags) ??
                 throw new VmmException("Memory Read Failed!");
+        }
+
+        #endregion
+
+        #region Write Methods
+
+        /// <summary>
+        /// Write value type/struct to specified address.
+        /// </summary>
+        /// <typeparam name="T">Specified Value Type.</typeparam>
+        /// <param name="addr">Address to write to.</param>
+        /// <param name="value">Value to write.</param>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void WriteValue<T>(ulong addr, T value)
+            where T : unmanaged
+        {
+            if (!_vmm.MemWriteValue(_pid, addr, value))
+                throw new VmmException("Memory Write Failed!");
         }
 
         #endregion

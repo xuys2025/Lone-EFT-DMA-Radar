@@ -546,5 +546,17 @@ namespace LoneEftDmaRadar
         /// </summary>
         [JsonPropertyName("autoGroups")]
         public bool AutoGroups { get; set; } = true;
+
+        /// <summary>
+        /// Enables No Recoil.
+        /// </summary>
+        [JsonPropertyName("noRecoil")]
+        public bool NoRecoil { get; set; } = false;
+
+        /// <summary>
+        /// Enables No Sway.
+        /// </summary>
+        [JsonPropertyName("noSway")]
+        public bool NoSway { get; set; } = false;
     }
 }

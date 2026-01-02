@@ -27,6 +27,7 @@ SOFTWARE.
 */
 
 using Collections.Pooled;
+using SDK;
 using LoneEftDmaRadar.Tarkov.Unity;
 using LoneEftDmaRadar.Tarkov.Unity.Collections;
 using LoneEftDmaRadar.Tarkov.Unity.Structures;
@@ -228,6 +229,88 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
             catch (Exception ex)
             {
                 Logging.WriteLine($"[Wishlist] ERROR Refreshing: {ex}");
+            }
+        }
+
+        private ulong _cachedBreathEffector;
+        private ulong _cachedShotEffector;
+        private ulong _cachedNewShotRecoil;
+        private ulong _lastPwaPtr;
+
+        /// <summary>
+        /// Apply No Recoil and No Sway.
+        /// </summary>
+        public void ApplyNoRecoilSway(bool noRecoil, bool noSway)
+        {
+            try
+            {
+                var pwa = Memory.ReadPtr(this.Base + SDK.Offsets.Player.ProceduralWeaponAnimation);
+                if (pwa == 0) return;
+
+                if (pwa != _lastPwaPtr)
+                {
+                    _cachedBreathEffector = 0;
+                    _cachedShotEffector = 0;
+                    _cachedNewShotRecoil = 0;
+                    _lastPwaPtr = pwa;
+                }
+
+                ulong breathEffector = _cachedBreathEffector;
+                ulong shotEffector = _cachedShotEffector;
+                ulong newShotRecoil = _cachedNewShotRecoil;
+
+                if (breathEffector == 0 || shotEffector == 0 || newShotRecoil == 0)
+                {
+                    breathEffector = Memory.ReadPtr(pwa + SDK.Offsets.ProceduralWeaponAnimation.Breath);
+                    shotEffector = Memory.ReadPtr(pwa + SDK.Offsets.ProceduralWeaponAnimation.Shootingg);
+                    if (shotEffector != 0)
+                        newShotRecoil = Memory.ReadPtr(shotEffector + SDK.Offsets.ShotEffector.NewShotRecoil);
+                    
+                    if (breathEffector != 0 && shotEffector != 0 && newShotRecoil != 0)
+                    {
+                        _cachedBreathEffector = breathEffector;
+                        _cachedShotEffector = shotEffector;
+                        _cachedNewShotRecoil = newShotRecoil;
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+
+                // No Sway
+                if (noSway)
+                {
+                    float currentBreath = Memory.ReadValue<float>(breathEffector + SDK.Offsets.BreathEffector.Intensity);
+                    if (Math.Abs(currentBreath - 0f) > 0.001f)
+                    {
+                        Memory.WriteValue(breathEffector + SDK.Offsets.BreathEffector.Intensity, 0f);
+                    }
+                }
+
+                // No Recoil
+                if (noRecoil)
+                {
+                    var currentRecoil = Memory.ReadValue<System.Numerics.Vector3>(newShotRecoil + SDK.Offsets.NewShotRecoil.IntensitySeparateFactors);
+                    if (currentRecoil != System.Numerics.Vector3.Zero)
+                    {
+                        Memory.WriteValue(newShotRecoil + SDK.Offsets.NewShotRecoil.IntensitySeparateFactors, System.Numerics.Vector3.Zero);
+                    }
+
+                    int currentMask = Memory.ReadValue<int>(pwa + SDK.Offsets.ProceduralWeaponAnimation.Mask);
+                    int targetMask = 16; // Shooting (EProceduralAnimationMask.Shooting)
+                    if (currentMask != targetMask)
+                    {
+                        Memory.WriteValue(pwa + SDK.Offsets.ProceduralWeaponAnimation.Mask, targetMask);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.WriteLine($"[LocalPlayer] ApplyNoRecoilSway Error: {ex.Message}");
+                _cachedBreathEffector = 0;
+                _cachedShotEffector = 0;
+                _cachedNewShotRecoil = 0;
             }
         }
 

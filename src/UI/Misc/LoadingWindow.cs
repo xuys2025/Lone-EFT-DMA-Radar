@@ -165,19 +165,18 @@ namespace LoneEftDmaRadar.UI.Misc
             }
 
             _input = _window.CreateInput();
+            // Use onConfigureIO callback to configure fonts BEFORE the controller builds the font atlas
             _imgui = new ImGuiController(
                 gl: _gl,
                 view: _window,
-                input: _input
+                input: _input,
+                onConfigureIO: () => ImGuiFonts.ConfigureFontsForAtlas(1.0f)
             );
             unsafe
             {
                 // Disable .ini file saving by setting IniFilename to null
                 ImGuiNET.ImGuiNative.igGetIO()->IniFilename = (byte*)null;
             }
-
-            // Configure font after ImGui context/controller are created.
-            ImGuiFonts.TryUseChineseFont();
 
             ConfigureStyle();
         }

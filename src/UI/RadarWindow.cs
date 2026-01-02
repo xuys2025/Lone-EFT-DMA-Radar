@@ -186,14 +186,13 @@ namespace LoneEftDmaRadar.UI
             CreateSkiaSurface();
 
             // ImGuiController will setup ImGui context
+            // Use onConfigureIO callback to configure fonts BEFORE the controller builds the font atlas
             _imgui = new ImGuiController(
                 gl: _gl,
                 view: _window,
-                input: _input
+                input: _input,
+                onConfigureIO: () => ImGuiFonts.ConfigureFontsForAtlas(Config.UI.UIScale)
             );
-
-            // Configure fonts AFTER the controller creates the ImGui context.
-            ImGuiFonts.TryUseChineseFont(Config.UI.UIScale);
 
             // Set IniFilename AFTER context and controller are created, then load settings
             unsafe
@@ -608,6 +607,14 @@ namespace LoneEftDmaRadar.UI
         {
             _gl.Viewport(0, 0, (uint)fbSize.X, (uint)fbSize.Y);
             _gl.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+
+            // Update FontGlobalScale for UI scaling (doesn't modify font atlas)
+            try
+            {
+                ImGui.GetIO().FontGlobalScale = Config.UI.UIScale;
+            }
+            catch { }
+
             _imgui.Update((float)delta);
             try
             {

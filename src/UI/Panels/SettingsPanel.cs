@@ -137,6 +137,8 @@ namespace LoneEftDmaRadar.UI.Panels
                     SKFonts.ApplyLanguage(Config.UI.Language ?? string.Empty);
                     _containerEntriesDirty = true;
                     TarkovDataManager.RequestReloadForCurrentLanguage(refreshFromWeb: true);
+                    // Queue ImGui font rebuild for next frame (before NewFrame)
+                    ImGuiFonts.RequestChineseFont(Config.UI.UIScale);
                 }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Switch UI language between English and Chinese"));
@@ -195,6 +197,8 @@ namespace LoneEftDmaRadar.UI.Panels
                 {
                     Config.UI.UIScale = uiScale;
                     UpdateScaleValues(uiScale);
+                    // Queue font rebuild for next frame (before NewFrame)
+                    ImGuiFonts.RequestRebuildWithScale(uiScale);
                 }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Scale UI elements (text, icons, widgets)"));
@@ -316,6 +320,22 @@ namespace LoneEftDmaRadar.UI.Panels
                 }
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Best-effort: automatically infer groups before raid start based on proximity"));
+
+                bool noRecoil = Config.Misc.NoRecoil;
+                if (ImGui.Checkbox(Loc.T("No Recoil"), ref noRecoil))
+                {
+                    Config.Misc.NoRecoil = noRecoil;
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.T("Removes weapon recoil"));
+
+                bool noSway = Config.Misc.NoSway;
+                if (ImGui.Checkbox(Loc.T("No Sway"), ref noSway))
+                {
+                    Config.Misc.NoSway = noSway;
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.T("Removes weapon sway/breath"));
 
                 ImGui.EndTabItem();
             }
@@ -533,15 +553,8 @@ namespace LoneEftDmaRadar.UI.Panels
 
         private static void UpdateScaleValues(float newScale)
         {
-            // ImGui UI scaling (text/widgets). This is separate from Skia rendering.
-            try
-            {
-                ImGui.GetIO().FontGlobalScale = newScale;
-            }
-            catch
-            {
-                // Ignore if ImGui context isn't ready yet.
-            }
+            // ImGui UI scaling is now handled by ImGuiFonts.ApplyPending to avoid locked atlas issues.
+            // Do NOT call ImGui.GetIO().FontGlobalScale here - it will be set before NewFrame.
 
             // Update Paints
             SKPaints.TextOutline.StrokeWidth = 2f * newScale;
