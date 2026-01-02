@@ -558,17 +558,17 @@ namespace LoneEftDmaRadar.UI
 
             if (!isStarting)
             {
-                baseText = "Game Process Not Running!";
+                baseText = Loc.T("Game Process Not Running!");
                 dotCount = 0;
             }
             else if (isStarting && !isReady)
             {
-                baseText = "Starting Up";
+                baseText = Loc.T("Starting Up");
                 dotCount = _statusOrder; // 1..3
             }
             else
             {
-                baseText = "Waiting for Raid Start";
+                baseText = Loc.T("Waiting for Raid Start");
                 dotCount = _statusOrder; // 1..3
             }
 

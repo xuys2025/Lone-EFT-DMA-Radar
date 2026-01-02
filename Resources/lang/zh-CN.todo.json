@@ -234,6 +234,13 @@
     "Language": "语言",
     "English": "英文",
     "Chinese": "中文",
-    "Switch UI language between English and Chinese": "在英文和中文之间切换界面语言"
+    "Switch UI language between English and Chinese": "在英文和中文之间切换界面语言",
+    "No Recoil": "无后座",
+    "Removes weapon recoil": "移除武器后座力",
+    "No Sway": "无晃动",
+    "Removes weapon sway/breath": "移除武器晃动/呼吸",
+    "Game Process Not Running!": "游戏进程未运行！",
+    "Starting Up": "正在启动",
+    "Waiting for Raid Start": "等待战局开始"
 }
 
