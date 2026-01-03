@@ -39,7 +39,8 @@ rem Delete any bin/obj under src (covers future multi-project layouts)
 for /d /r "src" %%D in (bin obj) do (
   if exist "%%~fD" (
     echo   - rmdir /s /q "%%~fD"
-    rmdir /s /q "%%~fD" >nul 2>&1
+    rmdir /s /q "%%~fD"
+    if exist "%%~fD" echo     [ERROR] Failed to delete "%%~fD". Check if files are in use.
   )
 )
 
