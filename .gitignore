@@ -364,3 +364,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# HarmonyOS Sans Font (Non-MIT License)
+Resources/HarmonyOS_Sans_Regular.ttf
+HarmonyOS_Sans/

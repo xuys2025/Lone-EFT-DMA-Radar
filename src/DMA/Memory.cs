@@ -594,6 +594,30 @@ namespace LoneEftDmaRadar.DMA
         /// <summary>
         /// Read null terminated Unity string (Unicode Encoding).
         /// </summary>
+        public static string ReadString(ulong addr, int cb = 128) => ReadUnityString(addr, cb);
+
+        /// <summary>
+        /// Read an array of pointers.
+        /// </summary>
+        public static List<ulong> ReadPtrArray(ulong addr, int count)
+        {
+            var list = new List<ulong>();
+            if (count <= 0) return list;
+            
+            // Limit max count to avoid huge reads on bad data
+            if (count > 1000) count = 1000;
+
+            using var buf = ReadPooled<ulong>(addr, count);
+            for (int i = 0; i < count; i++)
+            {
+                list.Add(buf.Memory.Span[i]);
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// Read null terminated Unity string (Unicode Encoding).
+        /// </summary>
         public static string ReadUnityString(ulong addr, int cb = 128, bool useCache = true)
         {
             ArgumentOutOfRangeException.ThrowIfGreaterThan(cb, 0x1000, nameof(cb));

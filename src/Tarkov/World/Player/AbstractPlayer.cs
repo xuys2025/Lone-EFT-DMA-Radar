@@ -67,30 +67,13 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         private static readonly SKPaint _paintHeightPos = new SKPaint { Color = SKColors.Red, IsAntialias = true };
         private static readonly SKPaint _paintHeightNeg = new SKPaint { Color = SKColors.DeepSkyBlue, IsAntialias = true };
 
-        private const float PP_LENGTH = 9f;
-        private const float PP_RADIUS = 3f;
-        private const float PP_HALF_HEIGHT = PP_RADIUS * 0.85f;
-        private const float PP_NOSE_X = PP_LENGTH / 2f + PP_RADIUS * 0.18f;
+        private const float PP_RADIUS = 4.0f;
+        private const float PP_NOSE_X = PP_RADIUS;
 
         private static SKPath CreatePlayerPillBase()
         {
             var path = new SKPath();
-
-            // Rounded back (left side)
-            var backRect = new SKRect(-PP_LENGTH / 2f, -PP_HALF_HEIGHT, -PP_LENGTH / 2f + PP_RADIUS * 2f, PP_HALF_HEIGHT);
-            path.AddArc(backRect, 90, 180);
-
-            // Pointed nose (right side)
-            float backFrontX = -PP_LENGTH / 2f + PP_RADIUS;
-
-            float c1X = backFrontX + PP_RADIUS * 1.1f;
-            float c2X = PP_NOSE_X - PP_RADIUS * 0.28f;
-            float c1Y = -PP_HALF_HEIGHT * 0.55f;
-            float c2Y = -PP_HALF_HEIGHT * 0.3f;
-
-            path.CubicTo(c1X, c1Y, c2X, c2Y, PP_NOSE_X, 0f);
-            path.CubicTo(c2X, -c2Y, c1X, -c1Y, backFrontX, PP_HALF_HEIGHT);
-
+            path.AddCircle(0, 0, PP_RADIUS);
             path.Close();
             return path;
         }
@@ -698,7 +681,8 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         {
             if (this != localPlayer && RadarWindow.MouseoverGroup is int grp && grp == GroupId)
                 _paints.Item1 = SKPaints.PaintMouseoverGroup;
-            float scale = 1.65f * Config.UI.UIScale;
+            // Reduced scale by 50% as requested (1.65f -> 0.825f)
+            float scale = 0.825f * Config.UI.UIScale;
 
             canvas.Save();
             canvas.Translate(point.X, point.Y);
@@ -710,8 +694,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
             canvas.DrawPath(_playerPill, SKPaints.ShapeOutline); // outline
             canvas.DrawPath(_playerPill, _paints.Item1);
 
-            var aimlineLength = this == localPlayer || (IsFriendly && Config.UI.TeammateAimlines) ?
-                Config.UI.AimLineLength : 0;
+            var aimlineLength = Config.UI.AimLineLength;
             if (!IsFriendly &&
                 !(IsAI && !Config.UI.AIAimlines) &&
                 this.IsFacingTarget(localPlayer, Config.UI.MaxDistance)) // Hostile Player, check if aiming at a friendly (High Alert)
@@ -723,7 +706,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
                 float invScale = 1f / Math.Max(0.001f, scale);
                 using var aimOutline = SKPaints.ShapeOutline.Clone();
                 aimOutline.StrokeWidth = SKPaints.ShapeOutline.StrokeWidth * invScale * 0.85f;
-                using var aimPaint = _paints.Item1.Clone();
+                using var aimPaint = new SKPaint { Color = SKColors.White, IsAntialias = true };
                 aimPaint.StrokeWidth = _paints.Item1.StrokeWidth * invScale * 0.85f;
 
                 // Draw line from nose tip forward
@@ -755,7 +738,11 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         {
             if (RadarWindow.MouseoverGroup is int grp && grp == GroupId)
                 _paints.Item2 = SKPaints.TextMouseoverGroup;
-            point.Offset(9.5f * Config.UI.UIScale, 0);
+            
+            // Offset below the player dot
+            // Radius is 4.0f, Scale is 1.65f. 4 * 1.65 = 6.6. Add padding.
+            point.Offset(0, 10f * Config.UI.UIScale);
+
             foreach (var (line, paint) in lines)
             {
                 if (string.IsNullOrEmpty(line?.Trim()))
@@ -763,8 +750,8 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
 
                 var textPaint = paint ?? _paints.Item2;
 
-                canvas.DrawText(line, point, SKTextAlign.Left, SKFonts.UIRegular, SKPaints.TextOutline); // Draw outline
-                canvas.DrawText(line, point, SKTextAlign.Left, SKFonts.UIRegular, textPaint); // draw line text
+                canvas.DrawText(line, point, SKTextAlign.Center, SKFonts.UIRegular, SKPaints.TextOutline); // Draw outline
+                canvas.DrawText(line, point, SKTextAlign.Center, SKFonts.UIRegular, textPaint); // draw line text
 
                 point.Offset(0, SKFonts.UIRegular.Spacing);
             }

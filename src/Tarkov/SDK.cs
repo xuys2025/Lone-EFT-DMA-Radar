@@ -2,6 +2,13 @@ namespace SDK
 {
     public readonly partial struct Offsets
     {
+        public readonly partial struct UnityList
+        {
+            public const uint Count = 0x18; // int32
+        }
+
+        public const uint UnityListBase = 0x20; // Start of list array
+
         public readonly partial struct GameWorld
         {
             public const uint BtrController = 0x20; // object
@@ -11,6 +18,30 @@ namespace SDK
             public const uint MainPlayer = 0x208; // object
             public const uint SynchronizableObjectLogicProcessor = 0x240; // object
             public const uint Grenades = 0x280; // object
+            public const uint ExfiltrationController = 0x50; // EFT.Interactive.ExfiltrationController
+        }
+
+        public readonly partial struct ExfiltrationController
+        {
+            public const uint SecretExfilitrationController = 0x18; // EFT.Interactive.SecretExfiltrations.SecretExfilitranionController
+            public const uint ExfiltrationPoints = 0x20; // EFT.Interactive.ExfiltrationPoint[]
+            public const uint ScavExfiltrationPoints = 0x28; // EFT.Interactive.ScavExfiltrationPoint[]
+            public const uint SecretExfiltrationPoints = 0x30; // EFT.Interactive.SecretExfiltrations.SecretExfiltrationPoint[]
+        }
+
+        public readonly partial struct ExfiltrationPoint
+        {
+            public const uint _status = 0x58; // EFT.Interactive.EExfiltrationStatus
+            public const uint Settings = 0x98; // EFT.Interactive.ExitTriggerSettings
+            public const uint EligibleEntryPoints = 0xC0; // string[]
+            public const uint EligibleIds = 0xF8; // System.Collections.Generic.List<string>
+        }
+
+        public readonly partial struct ExitTriggerSettings
+        {
+            public const uint Id = 0x10; // string
+            public const uint Name = 0x18; // string
+            public const uint EntryPoints = 0x40; // string
         }
 
         public readonly partial struct SynchronizableObject
@@ -242,6 +273,17 @@ namespace SDK
             Usec = 1,
             Bear = 2,
             Savage = 4,
+        }
+
+        public enum EExfiltrationStatus : byte
+        {
+            NotPresent = 1,
+            UncompleteRequirements = 2,
+            Countdown = 3,
+            RegularMode = 4,
+            Pending = 5,
+            AwaitsManualActivation = 6,
+            Postponed = 7,
         }
 
         [Flags]

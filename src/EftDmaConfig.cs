@@ -322,7 +322,7 @@ namespace LoneEftDmaRadar
         /// Player/Teammates Aimline Length (Max: 1500)
         /// </summary>
         [JsonPropertyName("aimLineLength")]
-        public int AimLineLength { get; set; } = 1500;
+        public int AimLineLength { get; set; } = 100;
 
         /// <summary>
         /// Show Hazards (mines,snipers,etc.) in the Radar UI.

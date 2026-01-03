@@ -165,23 +165,8 @@ namespace LoneEftDmaRadar.UI.Widgets
 
         private static Vector4 GetTextColor(AbstractPlayer player)
         {
-            SKColor color;
-            if (player.IsFocused)
-            {
-                color = SKPaints.PaintFocused.Color;
-            }
-            else
-            {
-                color = player.Type switch
-                {
-                    PlayerType.PMC => SKPaints.PaintPMC.Color,
-                    PlayerType.PScav => SKPaints.PaintPScav.Color,
-                    _ => SKColors.White
-                };
-            }
-
-            color = color.AdjustBrightness(0.5f);
-            return new Vector4(color.Red / 255f, color.Green / 255f, color.Blue / 255f, 1f);
+            // Always return white text as per user request
+            return new Vector4(1f, 1f, 1f, 1f);
         }
     }
 }

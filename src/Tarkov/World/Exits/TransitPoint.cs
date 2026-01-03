@@ -57,29 +57,22 @@ namespace LoneEftDmaRadar.Tarkov.World.Exits
             var point = Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams);
             MouseoverPosition = new Vector2(point.X, point.Y);
             SKPaints.ShapeOutline.StrokeWidth = 2f;
-            if (heightDiff > 1.85f) // exfil is above player
-            {
-                using var path = point.GetUpArrow(6.5f);
-                canvas.DrawPath(path, SKPaints.ShapeOutline);
-                canvas.DrawPath(path, paint);
-            }
-            else if (heightDiff < -1.85f) // exfil is below player
-            {
-                using var path = point.GetDownArrow(6.5f);
-                canvas.DrawPath(path, SKPaints.ShapeOutline);
-                canvas.DrawPath(path, paint);
-            }
-            else // exfil is level with player
-            {
-                float size = 4.75f * Program.Config.UI.UIScale;
-                canvas.DrawCircle(point, size, SKPaints.ShapeOutline);
-                canvas.DrawCircle(point, size, paint);
-            }
+            
+            float size = 8f * Program.Config.UI.UIScale;
+            canvas.DrawCircle(point, size, SKPaints.ShapeOutline);
+            canvas.DrawCircle(point, size, paint);
+
+            var text = Description ?? "Transit";
+            var textPoint = point;
+            textPoint.Offset(0, 12f * Program.Config.UI.UIScale);
+
+            canvas.DrawText(text, textPoint, SKTextAlign.Center, SKFonts.UIRegular, SKPaints.TextOutline);
+            canvas.DrawText(text, textPoint, SKTextAlign.Center, SKFonts.UIRegular, SKPaints.TextMouseover);
         }
 
         public void DrawMouseover(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)
         {
-            Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams).DrawMouseoverText(canvas, Description);
+            // Text is always drawn in Draw()
         }
 
         #endregion

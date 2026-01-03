@@ -47,13 +47,46 @@ namespace LoneEftDmaRadar.UI.Skia
         {
             try
             {
-                byte[] neoSansStdRegular;
-                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LoneEftDmaRadar.NeoSansStdRegular.otf"))
+                // Try to load HarmonyOS Sans from Embedded Resource
+                // This ensures the font is packaged with the application
+                using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("LoneEftDmaRadar.HarmonyOS_Sans_Regular.ttf"))
                 {
-                    neoSansStdRegular = new byte[stream!.Length];
-                    stream.ReadExactly(neoSansStdRegular);
+                    if (stream != null)
+                    {
+                        var fontData = new byte[stream.Length];
+                        stream.ReadExactly(fontData);
+                        NeoSansStdRegular = SKTypeface.FromStream(new MemoryStream(fontData, false));
+                        return;
+                    }
                 }
-                NeoSansStdRegular = SKTypeface.FromStream(new MemoryStream(neoSansStdRegular, false));
+            }
+            catch
+            {
+                // Ignore resource load failure and fall back to system fonts
+            }
+
+            try
+            {
+                // Fallback to system fonts
+                // Priority list:
+                // 1. Microsoft YaHei UI - Best for Windows UI (Chinese + English)
+                // 2. Microsoft YaHei - Standard Chinese
+                // 3. Segoe UI - Standard English (Fallback)
+                // 4. Arial - Universal Fallback
+                string[] fontFamilies = { "Microsoft YaHei UI", "Microsoft YaHei", "Segoe UI", "Arial" };
+                
+                SKTypeface typeface = null;
+                foreach (var family in fontFamilies)
+                {
+                    typeface = SKTypeface.FromFamilyName(family);
+                    // Verify we actually got the requested family (or close to it)
+                    if (typeface != null && typeface.FamilyName.Contains(family, StringComparison.OrdinalIgnoreCase))
+                    {
+                        break;
+                    }
+                }
+
+                NeoSansStdRegular = typeface ?? SKTypeface.Default;
             }
             catch (Exception ex)
             {

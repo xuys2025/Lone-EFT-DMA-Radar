@@ -344,7 +344,55 @@ namespace LoneEftDmaRadar.Tarkov.World
                 Memory.LocalPlayer?.RefreshWishlist(ct);
             RefreshEquipment(ct);
             RefreshQuestHelper(ct);
+            UpdateExfils(ct);
             PreRaidStartChecks(ct);
+        }
+
+        private void UpdateExfils(CancellationToken ct)
+        {
+            try
+            {
+                var exfilController = Memory.ReadPtr(Base + Offsets.GameWorld.ExfiltrationController);
+                if (exfilController == 0) return;
+
+                var points = Memory.ReadPtr(exfilController + Offsets.ExfiltrationController.ExfiltrationPoints);
+                if (points == 0) return;
+
+                var count = Memory.ReadValue<int>(points + Offsets.UnityList.Count);
+                if (count < 0 || count > 100) return;
+
+                var entries = Memory.ReadPtrArray(points + Offsets.UnityListBase, count);
+
+                foreach (var pointAddr in entries)
+                {
+                    ct.ThrowIfCancellationRequested();
+                    var status = (SDK.Enums.EExfiltrationStatus)Memory.ReadValue<byte>(pointAddr + Offsets.ExfiltrationPoint._status);
+                    var settings = Memory.ReadPtr(pointAddr + Offsets.ExfiltrationPoint.Settings);
+                    var namePtr = Memory.ReadPtr(settings + Offsets.ExitTriggerSettings.Name);
+                    var name = Memory.ReadString(namePtr);
+
+                    if (string.IsNullOrEmpty(name)) continue;
+
+                    // Map name
+                    string mappedName = name;
+                    if (Exfil.ExfilNames.TryGetValue(MapID, out var mapExfils) &&
+                        mapExfils.TryGetValue(name, out var outName))
+                    {
+                        mappedName = outName;
+                    }
+
+                    // Find matching Exfil
+                    var exfil = Exits.OfType<Exfil>().FirstOrDefault(x => string.Equals(x.Name, mappedName, StringComparison.OrdinalIgnoreCase));
+                    if (exfil != null)
+                    {
+                        exfil.Update(status);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logging.WriteLine($"[UpdateExfils] Error: {ex}");
+            }
         }
 
         /// <summary>

@@ -282,75 +282,59 @@ namespace LoneEftDmaRadar.UI.ColorPicker
             {
                 case ColorPickerOption.LocalPlayer:
                     SKPaints.PaintLocalPlayer.Color = skColor;
-                    SKPaints.TextLocalPlayer.Color = skColor;
                     SKPaints.PaintAimviewWidgetLocalPlayer.Color = skColor;
                     break;
                 case ColorPickerOption.FriendlyPlayer:
                     SKPaints.PaintTeammate.Color = skColor;
-                    SKPaints.TextTeammate.Color = skColor;
                     SKPaints.PaintAimviewWidgetTeammate.Color = skColor;
                     break;
                 case ColorPickerOption.PMCPlayer:
                     SKPaints.PaintPMC.Color = skColor;
-                    SKPaints.TextPMC.Color = skColor;
                     SKPaints.PaintAimviewWidgetPMC.Color = skColor;
                     break;
                 case ColorPickerOption.ScavPlayer:
                     SKPaints.PaintScav.Color = skColor;
-                    SKPaints.TextScav.Color = skColor;
                     SKPaints.PaintAimviewWidgetScav.Color = skColor;
                     break;
                 case ColorPickerOption.HumanScavPlayer:
                     SKPaints.PaintPScav.Color = skColor;
-                    SKPaints.TextPScav.Color = skColor;
                     SKPaints.PaintAimviewWidgetPScav.Color = skColor;
                     break;
                 case ColorPickerOption.BossPlayer:
                     SKPaints.PaintBoss.Color = skColor;
-                    SKPaints.TextBoss.Color = skColor;
                     SKPaints.PaintAimviewWidgetBoss.Color = skColor;
                     break;
                 case ColorPickerOption.RaiderPlayer:
                     SKPaints.PaintRaider.Color = skColor;
-                    SKPaints.TextRaider.Color = skColor;
                     SKPaints.PaintAimviewWidgetRaider.Color = skColor;
                     break;
                 case ColorPickerOption.FocusedPlayer:
                     SKPaints.PaintFocused.Color = skColor;
-                    SKPaints.TextFocused.Color = skColor;
                     SKPaints.PaintAimviewWidgetFocused.Color = skColor;
                     break;
                 case ColorPickerOption.RegularLoot:
                     SKPaints.PaintLoot.Color = skColor;
-                    SKPaints.TextLoot.Color = skColor;
                     break;
                 case ColorPickerOption.ValuableLoot:
                     SKPaints.PaintImportantLoot.Color = skColor;
-                    SKPaints.TextImportantLoot.Color = skColor;
                     break;
                 case ColorPickerOption.WishlistLoot:
                     SKPaints.PaintWishlistItem.Color = skColor;
-                    SKPaints.TextWishlistItem.Color = skColor;
                     break;
                 case ColorPickerOption.Corpse:
                     SKPaints.PaintCorpse.Color = skColor;
-                    SKPaints.TextCorpse.Color = skColor;
                     break;
                 case ColorPickerOption.MedsFilterLoot:
                     SKPaints.PaintMeds.Color = skColor;
-                    SKPaints.TextMeds.Color = skColor;
                     break;
                 case ColorPickerOption.FoodFilterLoot:
                     SKPaints.PaintFood.Color = skColor;
-                    SKPaints.TextFood.Color = skColor;
                     break;
                 case ColorPickerOption.BackpacksFilterLoot:
                     SKPaints.PaintBackpacks.Color = skColor;
-                    SKPaints.TextBackpacks.Color = skColor;
                     break;
                 case ColorPickerOption.QuestHelperItems:
                     SKPaints.PaintQuestItem.Color = skColor;
-                    SKPaints.TextQuestItem.Color = skColor;
                     break;
                 case ColorPickerOption.QuestHelperZones:
                     SKPaints.PaintQuestZone.Color = skColor;

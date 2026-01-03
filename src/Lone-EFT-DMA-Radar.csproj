@@ -62,6 +62,7 @@
 
 	<ItemGroup>
 		<EmbeddedResource Include="..\Resources\NeoSansStdRegular.otf" />
+		<EmbeddedResource Include="..\Resources\HarmonyOS_Sans_Regular.ttf" LogicalName="LoneEftDmaRadar.HarmonyOS_Sans_Regular.ttf" />
 		<EmbeddedResource Include="..\Resources\DEFAULT_DATA.json" />
 		<EmbeddedResource Include="..\Resources\lang\zh-CN.todo.json" LogicalName="LoneEftDmaRadar.Resources.lang.zh-CN.json" />
 	</ItemGroup>

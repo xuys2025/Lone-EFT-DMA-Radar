@@ -81,7 +81,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextMouseoverGroup { get; } = new()
         {
-            Color = SKColors.LawnGreen,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -90,7 +90,7 @@ namespace LoneEftDmaRadar.UI.Skia
         {
             Color = SKColors.Green,
             StrokeWidth = 1.66f,
-            Style = SKPaintStyle.Stroke,
+            Style = SKPaintStyle.Fill,
             IsAntialias = true,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeCap = SKStrokeCap.Round
@@ -98,7 +98,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextLocalPlayer { get; } = new()
         {
-            Color = SKColors.Green,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -107,7 +107,7 @@ namespace LoneEftDmaRadar.UI.Skia
         {
             Color = SKColors.LimeGreen,
             StrokeWidth = 1.66f,
-            Style = SKPaintStyle.Stroke,
+            Style = SKPaintStyle.Fill,
             IsAntialias = true,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeCap = SKStrokeCap.Round
@@ -115,7 +115,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextTeammate { get; } = new()
         {
-            Color = SKColors.LimeGreen,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -124,7 +124,7 @@ namespace LoneEftDmaRadar.UI.Skia
         {
             Color = SKColors.Red,
             StrokeWidth = 1.66f,
-            Style = SKPaintStyle.Stroke,
+            Style = SKPaintStyle.Fill,
             IsAntialias = true,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeCap = SKStrokeCap.Round
@@ -132,16 +132,16 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextPMC { get; } = new()
         {
-            Color = SKColors.Red,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
 
         public static SKPaint PaintScav { get; } = new()
         {
-            Color = SKColors.Yellow,
+            Color = SKColors.White,
             StrokeWidth = 1.66f,
-            Style = SKPaintStyle.Stroke,
+            Style = SKPaintStyle.Fill,
             IsAntialias = true,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeCap = SKStrokeCap.Round
@@ -149,7 +149,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextScav { get; } = new()
         {
-            Color = SKColors.Yellow,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -158,7 +158,7 @@ namespace LoneEftDmaRadar.UI.Skia
         {
             Color = SKColor.Parse("ffc70f"),
             StrokeWidth = 1.66f,
-            Style = SKPaintStyle.Stroke,
+            Style = SKPaintStyle.Fill,
             IsAntialias = true,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeCap = SKStrokeCap.Round
@@ -166,7 +166,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextRaider { get; } = new()
         {
-            Color = SKColor.Parse("ffc70f"),
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -175,7 +175,7 @@ namespace LoneEftDmaRadar.UI.Skia
         {
             Color = SKColors.Fuchsia,
             StrokeWidth = 1.66f,
-            Style = SKPaintStyle.Stroke,
+            Style = SKPaintStyle.Fill,
             IsAntialias = true,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeCap = SKStrokeCap.Round
@@ -183,7 +183,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextBoss { get; } = new()
         {
-            Color = SKColors.Fuchsia,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -192,7 +192,7 @@ namespace LoneEftDmaRadar.UI.Skia
         {
             Color = SKColors.Coral,
             StrokeWidth = 1.66f,
-            Style = SKPaintStyle.Stroke,
+            Style = SKPaintStyle.Fill,
             IsAntialias = true,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeCap = SKStrokeCap.Round
@@ -200,16 +200,16 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextFocused { get; } = new()
         {
-            Color = SKColors.Coral,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
 
         public static SKPaint PaintPScav { get; } = new()
         {
-            Color = SKColors.White,
+            Color = SKColors.Yellow,
             StrokeWidth = 1.66f,
-            Style = SKPaintStyle.Stroke,
+            Style = SKPaintStyle.Fill,
             IsAntialias = true,
             StrokeJoin = SKStrokeJoin.Round,
             StrokeCap = SKStrokeCap.Round
@@ -266,14 +266,14 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextLoot { get; } = new()
         {
-            Color = SKColors.WhiteSmoke,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
 
         public static SKPaint TextImportantLoot { get; } = new()
         {
-            Color = SKColors.Turquoise,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -288,7 +288,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextCorpse { get; } = new()
         {
-            Color = SKColors.Silver,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -303,7 +303,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextMeds { get; } = new()
         {
-            Color = SKColors.LightSalmon,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -318,7 +318,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextFood { get; } = new()
         {
-            Color = SKColors.CornflowerBlue,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -333,7 +333,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextBackpacks { get; } = new()
         {
-            Color = SKColor.Parse("00b02c"),
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -356,7 +356,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextQuestItem { get; } = new()
         {
-            Color = SKColors.YellowGreen,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -371,7 +371,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextWishlistItem { get; } = new()
         {
-            Color = SKColors.Lime,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -389,14 +389,14 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextRadarStatus { get; } = new()
         {
-            Color = SKColors.Red,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
 
         public static SKPaint TextStatusSmall { get; } = new SKPaint
         {
-            Color = SKColors.Red,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true,
         };
@@ -419,7 +419,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint PaintExfilTransit { get; } = new()
         {
-            Color = SKColors.Orange,
+            Color = SKColors.HotPink,
             StrokeWidth = 0.25f,
             Style = SKPaintStyle.Fill,
             IsAntialias = true,
@@ -524,7 +524,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint TextAimviewWidgetLoot { get; } = new()
         {
-            Color = SKColors.WhiteSmoke,
+            Color = SKColors.White,
             IsStroke = false,
             IsAntialias = true
         };
