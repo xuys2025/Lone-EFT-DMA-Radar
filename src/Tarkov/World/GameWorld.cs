@@ -372,8 +372,9 @@ namespace LoneEftDmaRadar.Tarkov.World
                     var name = Memory.ReadString(namePtr);
 
                     if (string.IsNullOrEmpty(name)) continue;
+                    name = name.Trim(); // Fix for leading/trailing spaces
 
-                    // Map name
+                    // Map name (for English data)
                     string mappedName = name;
                     if (Exfil.ExfilNames.TryGetValue(MapID, out var mapExfils) &&
                         mapExfils.TryGetValue(name, out var outName))
@@ -381,8 +382,10 @@ namespace LoneEftDmaRadar.Tarkov.World
                         mappedName = outName;
                     }
 
-                    // Find matching Exfil
-                    var exfil = Exits.OfType<Exfil>().FirstOrDefault(x => string.Equals(x.Name, mappedName, StringComparison.OrdinalIgnoreCase));
+                    // Find matching Exfil - try mapped name first, then original name
+                    var exfil = Exits.OfType<Exfil>().FirstOrDefault(x => 
+                        string.Equals(x.Name, mappedName, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(x.Name, name, StringComparison.OrdinalIgnoreCase));
                     if (exfil != null)
                     {
                         exfil.Update(status);

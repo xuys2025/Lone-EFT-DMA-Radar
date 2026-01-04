@@ -409,6 +409,13 @@ namespace LoneEftDmaRadar.UI
             // Get map parameters
             EftMapParams mapParams;
             var canvasSize = new SKSize(_window.Size.X, _window.Size.Y);
+            var effectiveSize = canvasSize;
+            
+            // Swap dimensions if rotated 90 or 270 degrees
+            if (Config.UI.MapRotation == 90 || Config.UI.MapRotation == 270)
+            {
+                effectiveSize = new SKSize(canvasSize.Height, canvasSize.Width);
+            }
 
             if (_isMapFreeEnabled)
             {
@@ -417,19 +424,49 @@ namespace LoneEftDmaRadar.UI
                     _mapPanPosition = localPlayerMapPos;
                 }
                 var panPos = _mapPanPosition;
-                mapParams = map.GetParameters(canvasSize, Config.UI.Zoom, ref panPos);
+                mapParams = map.GetParameters(effectiveSize, Config.UI.Zoom, ref panPos);
                 _mapPanPosition = panPos;
             }
             else
             {
                 _mapPanPosition = default;
-                mapParams = map.GetParameters(canvasSize, Config.UI.Zoom, ref localPlayerMapPos);
+                mapParams = map.GetParameters(effectiveSize, Config.UI.Zoom, ref localPlayerMapPos);
             }
 
-            var mapCanvasBounds = new SKRect(0, 0, canvasSize.Width, canvasSize.Height);
+            // Calculate window bounds in the rotated coordinate system
+            var center = new SKPoint(canvasSize.Width / 2f, canvasSize.Height / 2f);
+            var windowBounds = new SKRect(
+                center.X - effectiveSize.Width / 2f,
+                center.Y - effectiveSize.Height / 2f,
+                center.X + effectiveSize.Width / 2f,
+                center.Y + effectiveSize.Height / 2f
+            );
+
+            // Populate extra params for rotation
+            var extendedParams = new EftMapParams
+            {
+                Map = mapParams.Map,
+                Bounds = mapParams.Bounds,
+                XScale = mapParams.XScale,
+                YScale = mapParams.YScale,
+                ScreenCenter = center,
+                WindowTopLeft = windowBounds.Location,
+                Rotation = Config.UI.MapRotation
+            };
+            mapParams = extendedParams; // Use the extended params
+
+            canvas.Save(); // Save state before rotation
+
+            // Apply Rotation ONLY for Map Image
+            if (Config.UI.MapRotation != 0)
+            {
+                canvas.RotateDegrees(Config.UI.MapRotation, center.X, center.Y);
+            }
 
             // Draw Map
-            map.Draw(canvas, localPlayer.Position.Y, mapParams.Bounds, mapCanvasBounds);
+            map.Draw(canvas, localPlayer.Position.Y, mapParams.Bounds, windowBounds);
+
+            canvas.Restore(); // Restore state (Rotation) - Entities are drawn in screen space
 
             // --- LAYER 1: Low Priority (Environment, Containers, Normal Loot) ---
 
@@ -492,16 +529,7 @@ namespace LoneEftDmaRadar.UI
             }
 
             // --- LAYER 2: Medium Priority (AI Scavs) ---
-            var allPlayers = AllPlayers?.Where(x => !x.HasExfild);
-            if (allPlayers is not null)
-            {
-                foreach (var player in allPlayers)
-                {
-                    if (player == localPlayer) continue;
-                    if (player.Type == PlayerType.AIScav) // Draw AI Scavs
-                        player.Draw(canvas, mapParams, localPlayer);
-                }
-            }
+            // Moved to Layer 3 to be on top of important loot
 
             // --- LAYER 3: High Priority (Threats, Teammates, Important Loot) ---
 
@@ -515,14 +543,49 @@ namespace LoneEftDmaRadar.UI
                 }
             }
 
-            // Draw Players (PMC, Boss, Raider, Teammate, PScav)
+            var allPlayers = AllPlayers?.Where(x => !x.HasExfild);
+
+            // Draw AI Scavs Text
             if (allPlayers is not null)
             {
                 foreach (var player in allPlayers)
                 {
                     if (player == localPlayer) continue;
-                    if (player.Type != PlayerType.AIScav) // Draw High Priority Players
-                        player.Draw(canvas, mapParams, localPlayer);
+                    if (player.Type == PlayerType.AIScav) // Draw AI Scavs Text
+                        player.DrawInfoText(canvas, mapParams, localPlayer);
+                }
+            }
+
+            // Draw Players Text (PMC, Boss, Raider, Teammate, PScav)
+            if (allPlayers is not null)
+            {
+                foreach (var player in allPlayers)
+                {
+                    if (player == localPlayer) continue;
+                    if (player.Type != PlayerType.AIScav) // Draw High Priority Players Text
+                        player.DrawInfoText(canvas, mapParams, localPlayer);
+                }
+            }
+
+            // Draw AI Scavs Pills
+            if (allPlayers is not null)
+            {
+                foreach (var player in allPlayers)
+                {
+                    if (player == localPlayer) continue;
+                    if (player.Type == PlayerType.AIScav) // Draw AI Scavs Pills
+                        player.DrawPill(canvas, mapParams, localPlayer);
+                }
+            }
+
+            // Draw Players Pills (PMC, Boss, Raider, Teammate, PScav)
+            if (allPlayers is not null)
+            {
+                foreach (var player in allPlayers)
+                {
+                    if (player == localPlayer) continue;
+                    if (player.Type != PlayerType.AIScav) // Draw High Priority Players Pills
+                        player.DrawPill(canvas, mapParams, localPlayer);
                 }
             }
 
@@ -587,23 +650,51 @@ namespace LoneEftDmaRadar.UI
 
         private static void DrawGroupConnectors(SKCanvas canvas, IEnumerable<AbstractPlayer> allPlayers, IEftMap map, EftMapParams mapParams)
         {
-            using var groupedByGrp = new PooledDictionary<int, PooledList<SKPoint>>(capacity: 16);
+            using var hostileGroups = new PooledDictionary<int, PooledList<SKPoint>>(capacity: 16);
+            using var friendlyGroups = new PooledDictionary<int, PooledList<SKPoint>>(capacity: 4);
             try
             {
+                // Add LocalPlayer to friendly groups
+                var localPlayer = LocalPlayer;
+                if (localPlayer is not null && localPlayer.GroupId != AbstractPlayer.SoloGroupId)
+                {
+                    if (!friendlyGroups.TryGetValue(localPlayer.GroupId, out var list))
+                    {
+                        list = new PooledList<SKPoint>(capacity: 5);
+                        friendlyGroups[localPlayer.GroupId] = list;
+                    }
+                    list.Add(localPlayer.Position.ToMapPos(map.Config).ToZoomedPos(mapParams));
+                }
+
                 foreach (var player in allPlayers)
                 {
-                    if (player.IsHumanHostileActive && player.GroupId != AbstractPlayer.SoloGroupId)
+                    if (player == localPlayer) continue;
+
+                    if (player.GroupId != AbstractPlayer.SoloGroupId)
                     {
-                        if (!groupedByGrp.TryGetValue(player.GroupId, out var list))
+                        if (player.IsHumanHostileActive)
                         {
-                            list = new PooledList<SKPoint>(capacity: 5);
-                            groupedByGrp[player.GroupId] = list;
+                            if (!hostileGroups.TryGetValue(player.GroupId, out var list))
+                            {
+                                list = new PooledList<SKPoint>(capacity: 5);
+                                hostileGroups[player.GroupId] = list;
+                            }
+                            list.Add(player.Position.ToMapPos(map.Config).ToZoomedPos(mapParams));
                         }
-                        list.Add(player.Position.ToMapPos(map.Config).ToZoomedPos(mapParams));
+                        else if (player.IsFriendlyActive)
+                        {
+                            if (!friendlyGroups.TryGetValue(player.GroupId, out var list))
+                            {
+                                list = new PooledList<SKPoint>(capacity: 5);
+                                friendlyGroups[player.GroupId] = list;
+                            }
+                            list.Add(player.Position.ToMapPos(map.Config).ToZoomedPos(mapParams));
+                        }
                     }
                 }
 
-                foreach (var grp in groupedByGrp.Values)
+                // Draw Hostile Groups (Thick)
+                foreach (var grp in hostileGroups.Values)
                 {
                     for (int i = 0; i < grp.Count; i++)
                     {
@@ -613,11 +704,23 @@ namespace LoneEftDmaRadar.UI
                         }
                     }
                 }
+
+                // Draw Friendly Groups (Thin)
+                foreach (var grp in friendlyGroups.Values)
+                {
+                    for (int i = 0; i < grp.Count; i++)
+                    {
+                        for (int j = i + 1; j < grp.Count; j++)
+                        {
+                            canvas.DrawLine(grp[i].X, grp[i].Y, grp[j].X, grp[j].Y, SKPaints.PaintConnectorGroupFriendly);
+                        }
+                    }
+                }
             }
             finally
             {
-                foreach (var list in groupedByGrp.Values)
-                    list.Dispose();
+                foreach (var list in hostileGroups.Values) list.Dispose();
+                foreach (var list in friendlyGroups.Values) list.Dispose();
             }
         }
 
@@ -718,7 +821,8 @@ namespace LoneEftDmaRadar.UI
 
                     // Display current map and FPS on the right
                     string mapName = EftMapManager.Map?.Config?.Name ?? "No Map";
-                    string rightText = $"{mapName} | {_fps} FPS";
+                    string fontName = SKFonts.UIRegular.Typeface.FamilyName;
+                    string rightText = $"{mapName} | {_fps} FPS | Font: {fontName}";
                     float rightTextWidth = ImGui.CalcTextSize(rightText).X;
                     ImGui.SetCursorPosX(ImGui.GetWindowWidth() - rightTextWidth - 10);
                     ImGui.Text(rightText);
@@ -898,6 +1002,21 @@ namespace LoneEftDmaRadar.UI
             {
                 var deltaX = -(mousePos.X - _lastMousePosition.X);
                 var deltaY = -(mousePos.Y - _lastMousePosition.Y);
+
+                // Apply rotation to the delta vector to match map orientation
+                if (Config.UI.MapRotation != 0)
+                {
+                    // We need to rotate the delta vector by -Rotation degrees to map it back to map space
+                    float angleRad = -Config.UI.MapRotation * (MathF.PI / 180f);
+                    float cosTheta = MathF.Cos(angleRad);
+                    float sinTheta = MathF.Sin(angleRad);
+
+                    float rotatedDeltaX = deltaX * cosTheta - deltaY * sinTheta;
+                    float rotatedDeltaY = deltaX * sinTheta + deltaY * cosTheta;
+
+                    deltaX = rotatedDeltaX;
+                    deltaY = rotatedDeltaY;
+                }
 
                 _mapPanPosition = new Vector2(
                     _mapPanPosition.X + deltaX,

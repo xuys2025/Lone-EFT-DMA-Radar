@@ -37,9 +37,9 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKTypeface GetUiTypefaceForLanguage(string language)
         {
-            if (IsChineseLanguage(language) && TryGetChineseSystemTypeface(out var chinese))
-                return chinese;
-
+            // Since we are now using HarmonyOS Sans (which supports CJK) as the default "NeoSansStdRegular",
+            // we don't need to force system fonts for Chinese anymore.
+            // This ensures the user's chosen font (Thin) is used.
             return NeoSansStdRegular;
         }
 
@@ -47,9 +47,9 @@ namespace LoneEftDmaRadar.UI.Skia
         {
             try
             {
-                // Try to load HarmonyOS Sans from Embedded Resource
+                // Try to load HarmonyOS Sans SC Regular from Embedded Resource
                 // This ensures the font is packaged with the application
-                using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("LoneEftDmaRadar.HarmonyOS_Sans_Regular.ttf"))
+                using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("LoneEftDmaRadar.HarmonyOS_Sans_SC_Regular.ttf"))
                 {
                     if (stream != null)
                     {

@@ -92,6 +92,9 @@ namespace LoneEftDmaRadar.Web.TarkovDev
             [JsonPropertyName("height")]
             public int Height { get; set; }
 
+            [JsonPropertyName("types")]
+            public List<string> Types { get; set; }
+
             [JsonPropertyName("basePrice")]
             public long BasePrice { get; set; }
 

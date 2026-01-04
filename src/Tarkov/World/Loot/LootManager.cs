@@ -284,6 +284,10 @@ namespace LoneEftDmaRadar.Tarkov.World.Loot
                         //If NOT a quest item. Quest items are like the quest related things you need to find like the pocket watch or Jaeger's Letter etc. We want to ignore these quest items.
                         if (TarkovDataManager.AllItems.TryGetValue(id, out var entry))
                         {
+                            // Filter out Ammo Packs due to incorrect pricing
+                            if (entry.Types.Contains("ammoBox", StringComparer.OrdinalIgnoreCase))
+                                return;
+
                             _ = _loot.TryAdd(p.ItemBase, new LootItem(entry, pos));
                         }
                     }

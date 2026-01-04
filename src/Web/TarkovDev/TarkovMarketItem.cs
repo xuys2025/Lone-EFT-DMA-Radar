@@ -71,6 +71,8 @@ namespace LoneEftDmaRadar.Web.TarkovDev
         /// </summary>
         [JsonPropertyName("armorClass")]
         public int ArmorClass { get; set; }
+        [JsonPropertyName("types")]
+        public List<string> Types { get; set; } = new();
         [JsonPropertyName("categories")]
         public HashSet<string> Tags { get; set; } = new HashSet<string>();
         /// <summary>

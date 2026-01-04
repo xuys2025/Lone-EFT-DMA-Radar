@@ -63,6 +63,9 @@
 	<ItemGroup>
 		<EmbeddedResource Include="..\Resources\NeoSansStdRegular.otf" />
 		<EmbeddedResource Include="..\Resources\HarmonyOS_Sans_Regular.ttf" LogicalName="LoneEftDmaRadar.HarmonyOS_Sans_Regular.ttf" />
+		<EmbeddedResource Include="..\Resources\HarmonyOS_Sans_Light.ttf" LogicalName="LoneEftDmaRadar.HarmonyOS_Sans_Light.ttf" />
+		<EmbeddedResource Include="..\Resources\HarmonyOS_Sans_Thin.ttf" LogicalName="LoneEftDmaRadar.HarmonyOS_Sans_Thin.ttf" />
+		<EmbeddedResource Include="..\Resources\HarmonyOS_Sans_SC_Regular.ttf" LogicalName="LoneEftDmaRadar.HarmonyOS_Sans_SC_Regular.ttf" />
 		<EmbeddedResource Include="..\Resources\DEFAULT_DATA.json" />
 		<EmbeddedResource Include="..\Resources\lang\zh-CN.todo.json" LogicalName="LoneEftDmaRadar.Resources.lang.zh-CN.json" />
 	</ItemGroup>

@@ -54,13 +54,15 @@ namespace LoneEftDmaRadar.Tarkov.World.Exits
         {
             var heightDiff = Position.Y - localPlayer.Position.Y;
             var paint = SKPaints.PaintExfilTransit;
+            paint.Color = SKColors.HotPink.WithAlpha(80);
+
             var point = Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams);
             MouseoverPosition = new Vector2(point.X, point.Y);
-            SKPaints.ShapeOutline.StrokeWidth = 2f;
+            SKPaints.ShapeOutline.StrokeWidth = 1f;
             
             float size = 8f * Program.Config.UI.UIScale;
-            canvas.DrawCircle(point, size, SKPaints.ShapeOutline);
             canvas.DrawCircle(point, size, paint);
+            canvas.DrawCircle(point, size, SKPaints.ShapeOutline);
 
             var text = Description ?? "Transit";
             var textPoint = point;

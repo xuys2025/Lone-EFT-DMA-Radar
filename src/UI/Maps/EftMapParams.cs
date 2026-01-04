@@ -136,5 +136,20 @@ namespace LoneEftDmaRadar.UI.Maps
         /// Regular -> Zoomed 'Y' Scale correction.
         /// </summary>
         public float YScale { get; init; }
+        
+        /// <summary>
+        /// Center of the screen/window.
+        /// </summary>
+        public SKPoint ScreenCenter { get; init; }
+
+        /// <summary>
+        /// Top-Left of the map window bounds (before rotation).
+        /// </summary>
+        public SKPoint WindowTopLeft { get; init; }
+
+        /// <summary>
+        /// Map Rotation in degrees.
+        /// </summary>
+        public int Rotation { get; init; }
     }
 }

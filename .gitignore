@@ -48,6 +48,10 @@ Generated\ Files/
 # NUnit
 *.VisualState.xml
 TestResult.xml
+
+# Fonts
+HarmonyOS*.ttf
+Resources/HarmonyOS*.ttf
 nunit-*.xml
 
 # Build Results of an ATL Project

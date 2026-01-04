@@ -569,7 +569,14 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         public Vector2 MouseoverPosition { get; set; }
 
         private ValueTuple<SKPaint, SKPaint> _paints;
+
         public void Draw(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)
+        {
+            DrawInfoText(canvas, mapParams, localPlayer);
+            DrawPill(canvas, mapParams, localPlayer);
+        }
+
+        public void DrawPill(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)
         {
             try
             {
@@ -583,85 +590,99 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
                 {
                     _paints = GetPaints();
                     DrawPlayerPill(canvas, localPlayer, point);
-                    if (this == localPlayer)
-                        return;
-                    var height = Position.Y - localPlayer.Position.Y;
-                    var dist = Vector3.Distance(localPlayer.Position, Position);
-                    using var lines = new PooledList<(string, SKPaint)>();
-                    var observed = this as ObservedPlayer;
-                    string important = (observed is not null && observed.Equipment.CarryingImportantLoot) ?
-                        "!!" : null; // Flag important loot
-                    string name = null;
-                    if (IsError)
-                        name = "ERROR"; // In case POS stops updating, let us know!
-                    else
-                        name = Name;
-                    string health = null; string level = null;
-                    if (observed is not null)
-                    {
-                        health = observed.HealthStatus is Enums.ETagStatus.Healthy
-                            ? null
-                            : $" ({observed.HealthStatus})"; // Only display abnormal health status
-                    }
-                    string nameLine = $"{important}{level}{name}{health}";
-                    nameLine += $" ({dist:n0}m)";
-                    lines.Add((nameLine, null));
-
-                    string hText = $"H: {height:n0}";
-                    SKPaint hPaint = null;
-                    string arrow = "";
-
-                    if (height > 1)
-                    {
-                        hPaint = _paintHeightPos;
-                        if (height >= 8) arrow = " ▲▲▲";
-                        else if (height >= 5) arrow = " ▲▲";
-                        else arrow = " ▲";
-                    }
-                    else if (height < -1)
-                    {
-                        hPaint = _paintHeightNeg;
-                        if (height <= -8) arrow = " ▼▼▼";
-                        else if (height <= -5) arrow = " ▼▼";
-                        else arrow = " ▼";
-                    }
-
-                    lines.Add((hText + arrow, hPaint));
-
-                    if (Config.UI.ShowInHandsOnMap && observed?.Equipment?.InHands is not null)
-                    {
-                        string inHands = observed.Equipment.InHands.ShortName;
-                        if (!string.IsNullOrWhiteSpace(inHands))
-                            lines.Add((TrimMapLabel(inHands, maxLen: 24), null));
-                    }
-
-                    if (observed is not null && (IsPmc || Type == PlayerType.AIBoss))
-                    {
-                        var items = observed.Equipment.Items;
-                        int headClass = 0;
-                        int bodyClass = 0;
-
-                        if (items.TryGetValue("Headwear", out var helmet))
-                            headClass = helmet.ArmorClass;
-
-                        if (items.TryGetValue("ArmorVest", out var armor))
-                            bodyClass = armor.ArmorClass;
-
-                        if (items.TryGetValue("TacticalVest", out var rig) && rig.ArmorClass > bodyClass)
-                            bodyClass = rig.ArmorClass;
-
-                        if (headClass > 0 || bodyClass > 0)
-                        {
-                            lines.Add(($"头{headClass}甲{bodyClass}", null));
-                        }
-                    }
-
-                    DrawPlayerText(canvas, point, lines);
                 }
             }
             catch (Exception ex)
             {
-                Logging.WriteLine($"WARNING! Player Draw Error: {ex}");
+                Logging.WriteLine($"WARNING! Player DrawPill Error: {ex}");
+            }
+        }
+
+        public void DrawInfoText(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)
+        {
+            try
+            {
+                if (!IsAlive || this == localPlayer) return;
+
+                var point = Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams);
+                _paints = GetPaints();
+
+                var height = Position.Y - localPlayer.Position.Y;
+                var dist = Vector3.Distance(localPlayer.Position, Position);
+                using var lines = new PooledList<(string, SKPaint)>();
+                var observed = this as ObservedPlayer;
+                string important = (observed is not null && observed.Equipment.CarryingImportantLoot) ?
+                    "!!" : null; // Flag important loot
+                string name = null;
+                if (IsError)
+                    name = "ERROR"; // In case POS stops updating, let us know!
+                else
+                    name = Name;
+                string health = null; string level = null;
+                if (observed is not null)
+                {
+                    health = observed.HealthStatus is Enums.ETagStatus.Healthy
+                        ? null
+                        : $" ({observed.HealthStatus})"; // Only display abnormal health status
+                }
+                string nameLine = $"{important}{level}{name}{health}";
+                nameLine += $" ({dist:n0}m)";
+                lines.Add((nameLine, null));
+
+                string hText = $"H: {height:n0}";
+                SKPaint hPaint = null;
+                string arrow = "";
+
+                if (height > 1)
+                {
+                    hPaint = _paintHeightPos;
+                    if (height >= 8) arrow = " ▲▲▲";
+                    else if (height >= 5) arrow = " ▲▲";
+                    else arrow = " ▲";
+                }
+                else if (height < -1)
+                {
+                    hPaint = _paintHeightNeg;
+                    if (height <= -8) arrow = " ▼▼▼";
+                    else if (height <= -5) arrow = " ▼▼";
+                    else arrow = " ▼";
+                }
+
+                lines.Add((hText + arrow, hPaint));
+
+                if (Config.UI.ShowInHandsOnMap && observed?.Equipment?.InHands is not null)
+                {
+                    string inHands = observed.Equipment.InHands.ShortName;
+                    if (!string.IsNullOrWhiteSpace(inHands))
+                        lines.Add((TrimMapLabel(inHands, maxLen: 24), null));
+                }
+
+                if (observed is not null && (IsPmc || Type == PlayerType.AIBoss))
+                {
+                    var items = observed.Equipment.Items;
+                    int headClass = 0;
+                    int bodyClass = 0;
+
+                    if (items.TryGetValue("Headwear", out var helmet))
+                        headClass = helmet.ArmorClass;
+
+                    if (items.TryGetValue("ArmorVest", out var armor))
+                        bodyClass = armor.ArmorClass;
+
+                    if (items.TryGetValue("TacticalVest", out var rig) && rig.ArmorClass > bodyClass)
+                        bodyClass = rig.ArmorClass;
+
+                    if (headClass > 0 || bodyClass > 0)
+                    {
+                        lines.Add(($"头{headClass}甲{bodyClass}", null));
+                    }
+                }
+
+                DrawPlayerText(canvas, point, lines);
+            }
+            catch (Exception ex)
+            {
+                Logging.WriteLine($"WARNING! Player DrawInfoText Error: {ex}");
             }
         }
 
@@ -681,13 +702,13 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         {
             if (this != localPlayer && RadarWindow.MouseoverGroup is int grp && grp == GroupId)
                 _paints.Item1 = SKPaints.PaintMouseoverGroup;
-            // Reduced scale by 50% as requested (1.65f -> 0.825f)
-            float scale = 0.825f * Config.UI.UIScale;
+            // Base scale increased by 50% (0.825f -> 1.2375f) and multiplied by user config
+            float scale = 1.2375f * Config.UI.PlayerScale * Config.UI.UIScale;
 
             canvas.Save();
             canvas.Translate(point.X, point.Y);
             canvas.Scale(scale, scale);
-            canvas.RotateDegrees(MapRotation);
+            canvas.RotateDegrees(MapRotation + Config.UI.MapRotation);
 
             SKPaints.ShapeOutline.StrokeWidth = _paints.Item1.StrokeWidth * 1.3f;
             // Draw the pill
@@ -741,7 +762,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
             
             // Offset below the player dot
             // Radius is 4.0f, Scale is 1.65f. 4 * 1.65 = 6.6. Add padding.
-            point.Offset(0, 10f * Config.UI.UIScale);
+            point.Offset(0, 10f * Config.UI.UIScale + (SKFonts.UIRegular.Spacing / 2));
 
             foreach (var (line, paint) in lines)
             {

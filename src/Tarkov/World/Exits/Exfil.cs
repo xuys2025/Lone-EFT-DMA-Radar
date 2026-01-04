@@ -75,6 +75,9 @@ namespace LoneEftDmaRadar.Tarkov.World.Exits
                 case SDK.Enums.EExfiltrationStatus.AwaitsManualActivation:
                     Status = EStatus.Pending;
                     break;
+                case SDK.Enums.EExfiltrationStatus.Postponed:
+                    Status = EStatus.Pending;
+                    break;
                 default:
                     Status = EStatus.Closed;
                     break;
@@ -94,29 +97,29 @@ namespace LoneEftDmaRadar.Tarkov.World.Exits
 
             if (Status == EStatus.Open)
             {
-                paint.Color = SKColors.Green;
+                paint.Color = SKColors.Green.WithAlpha(80);
             }
             else if (Status == EStatus.Pending)
             {
-                paint.Color = SKColors.Yellow;
+                paint.Color = SKColors.Yellow.WithAlpha(80);
             }
             else // Closed
             {
-                paint.Color = SKColors.Red;
+                paint.Color = SKColors.Red.WithAlpha(80);
             }
 
             var point = Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams);
             MouseoverPosition = new Vector2(point.X, point.Y);
-            SKPaints.ShapeOutline.StrokeWidth = 2f;
+            SKPaints.ShapeOutline.StrokeWidth = 1f;
             
             float size = 10f * Program.Config.UI.UIScale;
-            canvas.DrawCircle(point, size, SKPaints.ShapeOutline);
             canvas.DrawCircle(point, size, paint);
+            canvas.DrawCircle(point, size, SKPaints.ShapeOutline);
 
             if (Program.Config.UI.AlwaysShowMapLabels)
             {
                 var exfilName = Name ?? "unknown";
-                Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams).DrawMouseoverText(canvas, new[] { exfilName }, drawBackground: false);
+                Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams).DrawMouseoverText(canvas, new[] { $"{exfilName} ({Status})" }, drawBackground: false);
             }
         }
 

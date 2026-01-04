@@ -162,17 +162,48 @@ namespace LoneEftDmaRadar.UI.Skia
 
         /// <summary>
         /// Convert an Unzoomed Map Position to a Zoomed Map Position ready for 2D Drawing.
+        /// Applies rotation if configured.
         /// </summary>
         /// <param name="mapPos">Unzoomed Map Position.</param>
         /// <param name="mapParams">Current Map Parameters.</param>
-        /// <returns>Zoomed 2D Map Position.</returns>
+        /// <returns>Zoomed 2D Map Position (Screen Coordinates).</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static SKPoint ToZoomedPos(this Vector2 mapPos, EftMapParams mapParams) =>
-            new SKPoint
+        public static SKPoint ToZoomedPos(this Vector2 mapPos, EftMapParams mapParams)
+        {
+            // 1. Calculate position relative to the top-left of the "effective" map window
+            float localX = (mapPos.X - mapParams.Bounds.Left) * mapParams.XScale;
+            float localY = (mapPos.Y - mapParams.Bounds.Top) * mapParams.YScale;
+
+            // 2. Offset by the window's top-left position to get absolute screen coordinates (unrotated)
+            float screenX = localX + mapParams.WindowTopLeft.X;
+            float screenY = localY + mapParams.WindowTopLeft.Y;
+
+            // 3. Apply Rotation around Screen Center
+            if (mapParams.Rotation == 0)
             {
-                X = (mapPos.X - mapParams.Bounds.Left) * mapParams.XScale,
-                Y = (mapPos.Y - mapParams.Bounds.Top) * mapParams.YScale
-            };
+                return new SKPoint(screenX, screenY);
+            }
+            else
+            {
+                return RotatePoint(new SKPoint(screenX, screenY), mapParams.ScreenCenter, mapParams.Rotation);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static SKPoint RotatePoint(SKPoint point, SKPoint center, float angleDegrees)
+        {
+            float angleRad = angleDegrees * (MathF.PI / 180f);
+            float cosTheta = MathF.Cos(angleRad);
+            float sinTheta = MathF.Sin(angleRad);
+
+            float dx = point.X - center.X;
+            float dy = point.Y - center.Y;
+
+            float rotatedX = center.X + (dx * cosTheta - dy * sinTheta);
+            float rotatedY = center.Y + (dx * sinTheta + dy * cosTheta);
+
+            return new SKPoint(rotatedX, rotatedY);
+        }
 
         /// <summary>
         /// Gets a drawable 'Up Arrow'. IDisposable. Applies UI Scaling internally.

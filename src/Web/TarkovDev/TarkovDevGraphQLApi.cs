@@ -111,6 +111,7 @@ namespace LoneEftDmaRadar.Web.TarkovDev
                     ShortName = item.ShortName,
                     Name = item.Name,
                     Tags = item.Categories?.Select(x => x.Name)?.Distinct().ToHashSet() ?? new(), // Flatten categories
+                    Types = item.Types ?? new(),
                     TraderPrice = item.HighestVendorPrice,
                     FleaPrice = item.OptimalFleaPrice,
                     Slots = slots,
@@ -141,12 +142,13 @@ namespace LoneEftDmaRadar.Web.TarkovDev
         private static async Task<HttpResponseMessage> QueryTarkovDevAsync()
         {
             var lang = GetLanguageCodeForCurrentUi();
+            // Maps/extracts always use English for consistent matching with game memory data
             var query = new Dictionary<string, string>
             {
                 { "query",
                 $$"""
                 {
-                    maps(lang: {{lang}}) {
+                    maps(lang: en) {
                         name
                         nameId
                         extracts {
@@ -169,6 +171,7 @@ namespace LoneEftDmaRadar.Web.TarkovDev
                         shortName
                         width
                         height
+                        types
                         sellFor {
                             vendor { name }
                             priceRUB

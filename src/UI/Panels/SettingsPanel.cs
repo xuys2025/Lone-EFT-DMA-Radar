@@ -203,6 +203,26 @@ namespace LoneEftDmaRadar.UI.Panels
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Scale UI elements (text, icons, widgets)"));
 
+                // Player Scale
+                float playerScale = Config.UI.PlayerScale;
+                if (ImGui.SliderFloat(Loc.T("Player Scale"), ref playerScale, 0.1f, 2.0f, "%.1f"))
+                {
+                    Config.UI.PlayerScale = playerScale;
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.T("Scale player icons on the map"));
+
+                // Map Rotation
+                int mapRotation = Config.UI.MapRotation;
+                ImGui.Text(Loc.T("Map Rotation"));
+                if (ImGui.RadioButton("0°", mapRotation == 0)) Config.UI.MapRotation = 0;
+                ImGui.SameLine();
+                if (ImGui.RadioButton("90°", mapRotation == 90)) Config.UI.MapRotation = 90;
+                ImGui.SameLine();
+                if (ImGui.RadioButton("180°", mapRotation == 180)) Config.UI.MapRotation = 180;
+                ImGui.SameLine();
+                if (ImGui.RadioButton("270°", mapRotation == 270)) Config.UI.MapRotation = 270;
+
                 // Zoom
                 int zoom = Config.UI.Zoom;
                 if (ImGui.SliderInt(Loc.T("Zoom (F1/F2)"), ref zoom, 1, 200))
@@ -573,7 +593,7 @@ namespace LoneEftDmaRadar.UI.Panels
             SKPaints.PaintQuestZone.StrokeWidth = 0.25f * newScale;
             SKPaints.PaintQuestItem.StrokeWidth = 0.25f * newScale;
             SKPaints.PaintWishlistItem.StrokeWidth = 0.25f * newScale;
-            SKPaints.PaintConnectorGroup.StrokeWidth = 2.25f * newScale;
+            SKPaints.PaintConnectorGroup.StrokeWidth = 1.0f * newScale;
             SKPaints.PaintMouseoverGroup.StrokeWidth = 1.66f * newScale;
 
             // Fonts

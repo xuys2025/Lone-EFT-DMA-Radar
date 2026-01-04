@@ -9,6 +9,7 @@ namespace LoneEftDmaRadar.UI.Localization
         private static float _pendingScale = 1.0f;
         private static float _appliedScale = -1.0f;
         private static volatile bool _initialSetupDone;
+        private static string _cachedFontPath; // Cache the extracted font file path
 
         /// <summary>
         /// Configure fonts for ImGui atlas. Call this from ImGuiController's onConfigureIO callback
@@ -20,6 +21,19 @@ namespace LoneEftDmaRadar.UI.Localization
             {
                 var io = ImGui.GetIO();
                 float fontSize = Math.Clamp(16f * uiScale, 12f, 28f);
+
+                // Try to load from embedded resource first (extract to temp file)
+                string fontPath = GetOrExtractEmbeddedFont();
+                if (fontPath != null && File.Exists(fontPath))
+                {
+                    var ranges = io.Fonts.GetGlyphRangesChineseFull();
+                    io.Fonts.AddFontFromFileTTF(fontPath, fontSize, null, ranges);
+
+                    Logging.WriteLine($"ImGuiFonts: Configured embedded font: HarmonyOS_Sans_SC_Regular ({fontSize:0.0}px)");
+                    _appliedScale = uiScale;
+                    _initialSetupDone = true;
+                    return;
+                }
 
                 string windowsFonts = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts");
                 string[] candidates =
@@ -143,6 +157,20 @@ namespace LoneEftDmaRadar.UI.Localization
                 // Pick a reasonable default size; let existing UI scaling handle the rest.
                 float fontSize = Math.Clamp(16f * uiScale, 12f, 28f);
 
+                // Clear default fonts so we don't bloat the atlas.
+                io.Fonts.Clear();
+
+                // Try to load from embedded resource first (extract to temp file)
+                string fontPath = GetOrExtractEmbeddedFont();
+                if (fontPath != null && File.Exists(fontPath))
+                {
+                    var ranges = io.Fonts.GetGlyphRangesChineseFull();
+                    io.Fonts.AddFontFromFileTTF(fontPath, fontSize, null, ranges);
+
+                    Logging.WriteLine($"ImGuiFonts: Loaded embedded font: HarmonyOS_Sans_SC_Regular ({fontSize:0.0}px)");
+                    return true;
+                }
+
                 // Try common Windows CJK fonts (prefer Microsoft YaHei).
                 string windowsFonts = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "Fonts");
                 string[] candidates =
@@ -203,6 +231,41 @@ namespace LoneEftDmaRadar.UI.Localization
             catch
             {
                 // Best effort; if we can't recreate the font texture, the controller may still do it later.
+            }
+        }
+
+        /// <summary>
+        /// Extract the embedded font to a temp file and return the path.
+        /// Caches the path so subsequent calls don't re-extract.
+        /// </summary>
+        private static string GetOrExtractEmbeddedFont()
+        {
+            // Return cached path if already extracted
+            if (_cachedFontPath != null && File.Exists(_cachedFontPath))
+                return _cachedFontPath;
+
+            try
+            {
+                using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("LoneEftDmaRadar.HarmonyOS_Sans_SC_Regular.ttf");
+                if (stream == null)
+                    return null;
+
+                // Extract to temp directory
+                string tempPath = Path.Combine(Path.GetTempPath(), "LoneRadar_HarmonyOS_Sans_SC_Regular.ttf");
+                
+                using (var fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
+                {
+                    stream.CopyTo(fileStream);
+                }
+
+                _cachedFontPath = tempPath;
+                Logging.WriteLine($"ImGuiFonts: Extracted embedded font to: {tempPath}");
+                return tempPath;
+            }
+            catch (Exception ex)
+            {
+                Logging.WriteLine($"ImGuiFonts: Failed to extract embedded font: {ex.Message}");
+                return null;
             }
         }
     }

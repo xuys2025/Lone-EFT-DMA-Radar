@@ -301,6 +301,12 @@ namespace LoneEftDmaRadar
         public float UIScale { get; set; } = 1.0f;
 
         /// <summary>
+        /// Scale factor for Player Pills (0.1 - 2.0, default: 1.0)
+        /// </summary>
+        [JsonPropertyName("playerScale")]
+        public float PlayerScale { get; set; } = 1.0f;
+
+        /// <summary>
         /// Size of the Radar Window.
         /// </summary>
         [JsonPropertyName("windowSize")]
@@ -371,6 +377,12 @@ namespace LoneEftDmaRadar
         /// </summary>
         [JsonPropertyName("alwaysShowMapLabels")]
         public bool AlwaysShowMapLabels { get; set; } = false;
+
+        /// <summary>
+        /// Map Rotation in degrees (0, 90, 180, 270).
+        /// </summary>
+        [JsonPropertyName("mapRotation")]
+        public int MapRotation { get; set; } = 0;
     }
 
     public sealed class LootConfig
