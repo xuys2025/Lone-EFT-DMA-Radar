@@ -33,6 +33,8 @@ using LoneEftDmaRadar.UI.Skia;
 using LoneEftDmaRadar.Web.TarkovDev;
 using System.Collections.Frozen;
 
+using LoneEftDmaRadar.UI.Localization;
+
 namespace LoneEftDmaRadar.Tarkov.World.Exits
 {
     public class Exfil : IExitPoint, IWorldEntity, IMapEntity, IMouseoverEntity
@@ -118,20 +120,22 @@ namespace LoneEftDmaRadar.Tarkov.World.Exits
 
             if (Program.Config.UI.AlwaysShowMapLabels)
             {
-                var exfilName = Name ?? "unknown";
+                var exfilName = Loc.Exit(Memory.MapID, Name) ?? "unknown";
                 Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams).DrawMouseoverText(canvas, new[] { $"{exfilName} ({Status})" }, drawBackground: false);
             }
         }
 
         public void DrawMouseover(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)
         {
-            var exfilName = Name;
+            var exfilName = Loc.Exit(Memory.MapID, Name);
             exfilName ??= "unknown";
             Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams).DrawMouseoverText(canvas, $"{exfilName} ({Status})");
         }
 
         #endregion
 
+        // This dictionary is now primarily used for mapping internal BSG IDs to English names.
+        // Localization is handled by Loc.Exit() in the Draw method.
         public static readonly System.Collections.Frozen.FrozenDictionary<string, System.Collections.Frozen.FrozenDictionary<string, string>> ExfilNames = new Dictionary<string, System.Collections.Frozen.FrozenDictionary<string, string>>(StringComparer.OrdinalIgnoreCase)
         {
             { "woods", new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)

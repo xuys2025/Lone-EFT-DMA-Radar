@@ -514,7 +514,7 @@ namespace LoneEftDmaRadar.UI
                 {
                     if (player == localPlayer) continue;
                     if (player.Type == PlayerType.AIScav) // Draw AI Scavs Pills
-                        player.DrawPill(canvas, mapParams, localPlayer);
+                        player.DrawPill(canvas, mapParams, localPlayer, allPlayers);
                 }
             }
 
@@ -525,7 +525,7 @@ namespace LoneEftDmaRadar.UI
                 {
                     if (player == localPlayer) continue;
                     if (player.Type != PlayerType.AIScav) // Draw High Priority Players Pills
-                        player.DrawPill(canvas, mapParams, localPlayer);
+                        player.DrawPill(canvas, mapParams, localPlayer, allPlayers);
                 }
             }
 

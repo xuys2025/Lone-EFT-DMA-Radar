@@ -68,6 +68,7 @@
 		<EmbeddedResource Include="..\Resources\HarmonyOS_Sans_SC_Regular.ttf" LogicalName="LoneEftDmaRadar.HarmonyOS_Sans_SC_Regular.ttf" />
 		<EmbeddedResource Include="..\Resources\DEFAULT_DATA.json" />
 		<EmbeddedResource Include="..\Resources\lang\zh-CN.todo.json" LogicalName="LoneEftDmaRadar.Resources.lang.zh-CN.json" />
+		<EmbeddedResource Include="..\Resources\lang\exits.zh-CN.json" LogicalName="LoneEftDmaRadar.Resources.lang.exits.zh-CN.json" />
 	</ItemGroup>
 
   <ItemGroup>

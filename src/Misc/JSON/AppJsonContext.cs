@@ -94,6 +94,7 @@ namespace LoneEftDmaRadar.Misc.JSON
     // Collection types
     [JsonSerializable(typeof(HashSet<string>))]
     [JsonSerializable(typeof(Dictionary<string, string>))]
+    [JsonSerializable(typeof(Dictionary<string, Dictionary<string, string>>))]
     // Primitive types (for converters)
     [JsonSerializable(typeof(byte))]
     // Map config types

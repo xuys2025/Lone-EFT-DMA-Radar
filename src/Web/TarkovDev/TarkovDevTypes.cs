@@ -59,6 +59,9 @@ namespace LoneEftDmaRadar.Web.TarkovDev
             [JsonPropertyName("maps")]
             public List<MapElement> Maps { get; set; }
 
+            [JsonPropertyName("mapsZH")]
+            public List<MapElement> MapsZH { get; set; }
+
             [JsonPropertyName("tasks")]
             public List<TaskElement> Tasks { get; set; }
         }

@@ -131,6 +131,48 @@ namespace LoneEftDmaRadar.Web.TarkovDev
                     Slots = 1
                 });
             }
+
+            // Generate Exit Mapping (ZH-CN)
+            if (query.Data.MapsZH is not null && query.Data.Maps is not null)
+            {
+                var mapping = new Dictionary<string, Dictionary<string, string>>();
+
+                foreach (var mapEn in query.Data.Maps)
+                {
+                    var mapZh = query.Data.MapsZH.FirstOrDefault(m => m.NameId == mapEn.NameId);
+                    if (mapZh is null) continue;
+
+                    var exitMap = new Dictionary<string, string>();
+
+                    foreach (var exitEn in mapEn.Extracts)
+                    {
+                        // Match by position (approximate)
+                        var exitZh = mapZh.Extracts.FirstOrDefault(e =>
+                            Vector3.DistanceSquared(e.Position, exitEn.Position) < 1.0f);
+
+                        if (exitZh is not null && !string.Equals(exitEn.Name, exitZh.Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            exitMap[exitEn.Name] = exitZh.Name;
+                        }
+                    }
+
+                    if (exitMap.Count > 0)
+                    {
+                        mapping[mapEn.NameId] = exitMap;
+                    }
+                }
+
+                try
+                {
+                    // Save to AppData for easy access
+                    var path = Path.Combine(Program.ConfigPath.FullName, "exits.zh-CN.json");
+                    var json = JsonSerializer.Serialize(mapping, AppJsonContext.Default.DictionaryStringDictionaryStringString);
+                    File.WriteAllText(path, json);
+                }
+                catch { }
+            }
+            query.Data.MapsZH = null;
+
             // Set result
             query.Data.Items = cleanedItems;
             // Null out processed query
@@ -162,6 +204,13 @@ namespace LoneEftDmaRadar.Web.TarkovDev
                         }
                         hazards {
                             hazardType
+                            position { x, y, z }
+                        }
+                    }
+                    mapsZH: maps(lang: zh) {
+                        nameId
+                        extracts {
+                            name
                             position { x, y, z }
                         }
                     }

@@ -523,7 +523,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
             DrawPill(canvas, mapParams, localPlayer);
         }
 
-        public void DrawPill(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)
+        public void DrawPill(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer, IEnumerable<AbstractPlayer> allPlayers = null)
         {
             try
             {
@@ -536,7 +536,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
                 else
                 {
                     _paints = GetPaints();
-                    DrawPlayerPill(canvas, localPlayer, point);
+                    DrawPlayerPill(canvas, localPlayer, point, allPlayers);
                 }
             }
             catch (Exception ex)
@@ -645,7 +645,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         /// <summary>
         /// Draws a Player Pill on this location.
         /// </summary>
-        private void DrawPlayerPill(SKCanvas canvas, LocalPlayer localPlayer, SKPoint point)
+        private void DrawPlayerPill(SKCanvas canvas, LocalPlayer localPlayer, SKPoint point, IEnumerable<AbstractPlayer> allPlayers)
         {
             if (this != localPlayer && RadarWindow.MouseoverGroup is int grp && grp == GroupId)
                 _paints.Item1 = SKPaints.PaintMouseoverGroup;
@@ -663,9 +663,24 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
             canvas.DrawPath(_playerPill, _paints.Item1);
 
             var aimlineLength = Config.UI.AimLineLength;
+
+            bool isAimingAtFriendly = this.IsFacingTarget(localPlayer, Config.UI.MaxDistance);
+
+            if (!isAimingAtFriendly && allPlayers != null)
+            {
+                foreach (var other in allPlayers)
+                {
+                    if (other.Type == PlayerType.Teammate && this.IsFacingTarget(other, Config.UI.MaxDistance))
+                    {
+                        isAimingAtFriendly = true;
+                        break;
+                    }
+                }
+            }
+
             if (!IsFriendly &&
                 !(IsAI && !Config.UI.AIAimlines) &&
-                this.IsFacingTarget(localPlayer, Config.UI.MaxDistance)) // Hostile Player, check if aiming at a friendly (High Alert)
+                isAimingAtFriendly) // Hostile Player, check if aiming at a friendly (High Alert)
                 aimlineLength = 9999;
 
             if (aimlineLength > 0)

@@ -164,7 +164,7 @@ namespace LoneEftDmaRadar.UI.Skia
 
         public static SKPaint PaintRaider { get; } = new()
         {
-            Color = SKColor.Parse("ffc70f"),
+            Color = SKColors.Violet,
             StrokeWidth = 1.66f,
             Style = SKPaintStyle.Fill,
             IsAntialias = true,
