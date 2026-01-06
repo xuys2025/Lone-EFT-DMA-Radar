@@ -183,6 +183,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
             {
                 Type = PlayerType.Teammate;
             }
+            IsFocused = _raidCache is RaidCache rc && rc.Focused.ContainsKey(Id);
         }
 
         /// <summary>
@@ -220,6 +221,26 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
             {
                 Type = PlayerSide == Enums.EPlayerSide.Savage ? PlayerType.PScav : PlayerType.PMC;
                 GroupId = SoloGroupId;
+            }
+        }
+
+        /// <summary>
+        /// Focus or Unfocus this Player.
+        /// </summary>
+        /// <param name="isFocused">True to focus the player, otherwise false.</param>
+        public override void SetFocus(bool isFocused)
+        {
+            IsFocused = isFocused;
+            if (_raidCache is RaidCache raidCache)
+            {
+                if (isFocused)
+                {
+                    raidCache.Focused.TryAdd(Id, 0);
+                }
+                else
+                {
+                    _ = raidCache.Focused.TryRemove(Id, out _);
+                }
             }
         }
 
