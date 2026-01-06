@@ -113,6 +113,18 @@ namespace LoneEftDmaRadar.UI.Panels
                         ImGui.SetTooltip(Loc.T("Open loot filter options"));
                 }
 
+                // Map Rotation - placed below Map Free and Loot buttons
+                int mapRotation = Config.UI.MapRotation;
+                ImGui.Text(Loc.T("Map Rotation"));
+                ImGui.SameLine();
+                if (ImGui.RadioButton("0°##MapRot0", mapRotation == 0)) Config.UI.MapRotation = 0;
+                ImGui.SameLine();
+                if (ImGui.RadioButton("90°##MapRot90", mapRotation == 90)) Config.UI.MapRotation = 90;
+                ImGui.SameLine();
+                if (ImGui.RadioButton("180°##MapRot180", mapRotation == 180)) Config.UI.MapRotation = 180;
+                ImGui.SameLine();
+                if (ImGui.RadioButton("270°##MapRot270", mapRotation == 270)) Config.UI.MapRotation = 270;
+
                 ImGui.End();
             }
         }
@@ -167,26 +179,28 @@ namespace LoneEftDmaRadar.UI.Panels
 
             ImGui.Separator();
 
-            // Value Thresholds - side by side
+            // Value Thresholds - Sliders with 'k' formatting
             ImGui.Text(Loc.T("Min Value:"));
-            ImGui.SameLine(150);
-            ImGui.Text(Loc.T("Valuable Min:"));
-
-            ImGui.SetNextItemWidth(140);
-            int minValue = Config.Loot.MinValue;
-            if (ImGui.InputInt("##MinValue", ref minValue, 1000, 10000))
+            ImGui.SetNextItemWidth(250);
+            
+            // Working in 'k' units for the slider
+            int minValueK = Config.Loot.MinValue / 1000;
+            if (ImGui.SliderInt("##MinValue", ref minValueK, 10, 100, "%dk"))
             {
-                Config.Loot.MinValue = Math.Max(0, minValue);
+                Config.Loot.MinValue = Math.Max(0, minValueK * 1000);
                 Memory.Loot?.RefreshFilter();
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(Loc.T("Minimum value to display regular loot"));
-            ImGui.SameLine(150);
-            ImGui.SetNextItemWidth(140);
-            int valuableMin = Config.Loot.MinValueValuable;
-            if (ImGui.InputInt("##ValuableMin", ref valuableMin, 1000, 10000))
+            
+            ImGui.Text(Loc.T("Valuable Min:"));
+            ImGui.SetNextItemWidth(250);
+            
+            // Working in 'k' units for the slider
+            int valuableMinK = Config.Loot.MinValueValuable / 1000;
+            if (ImGui.SliderInt("##ValuableMin", ref valuableMinK, 100, 1000, "%dk"))
             {
-                Config.Loot.MinValueValuable = Math.Max(0, valuableMin);
+                Config.Loot.MinValueValuable = Math.Max(0, valuableMinK * 1000);
                 Memory.Loot?.RefreshFilter();
             }
             if (ImGui.IsItemHovered())
@@ -194,7 +208,10 @@ namespace LoneEftDmaRadar.UI.Panels
 
             ImGui.Separator();
 
-            // Price options on one line
+            // Price options
+            // Flow contents naturally. 
+            // "Price per Slot" [checkbox] | "Mode:" [text] | "Flea" [radio] | "Trader" [radio]
+            
             bool pricePerSlot = Config.Loot.PricePerSlot;
             if (ImGui.Checkbox(Loc.WithId("Price per Slot##PricePerSlot"), ref pricePerSlot))
             {
@@ -203,7 +220,9 @@ namespace LoneEftDmaRadar.UI.Panels
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(Loc.T("Calculate value based on price per inventory slot"));
-            ImGui.SameLine(150);
+            
+            ImGui.SameLine();
+            
             ImGui.Text(Loc.T("Mode:"));
             ImGui.SameLine();
             int priceMode = (int)Config.Loot.PriceMode;
@@ -225,7 +244,8 @@ namespace LoneEftDmaRadar.UI.Panels
 
             ImGui.Separator();
 
-            // Category toggles
+            // Category toggles - 2 per line using simple SameLine logic
+            // Line 1
             bool hideCorpses = Config.Loot.HideCorpses;
             if (ImGui.Checkbox(Loc.WithId("Hide Corpses##HideCorpses"), ref hideCorpses))
             {
@@ -234,7 +254,9 @@ namespace LoneEftDmaRadar.UI.Panels
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(Loc.T("Hide player corpses from the radar"));
-            ImGui.SameLine(150);
+            
+            ImGui.SameLine();
+
             bool showMeds = LootFilter.ShowMeds;
             if (ImGui.Checkbox(Loc.WithId("Show Meds##ShowMeds"), ref showMeds))
             {
@@ -244,6 +266,7 @@ namespace LoneEftDmaRadar.UI.Panels
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(Loc.T("Show medical items regardless of value"));
 
+            // Line 2
             bool showFood = LootFilter.ShowFood;
             if (ImGui.Checkbox(Loc.WithId("Show Food##ShowFood"), ref showFood))
             {
@@ -252,7 +275,9 @@ namespace LoneEftDmaRadar.UI.Panels
             }
             if (ImGui.IsItemHovered())
                 ImGui.SetTooltip(Loc.T("Show food and drinks regardless of value"));
-            ImGui.SameLine(150);
+            
+            ImGui.SameLine();
+
             bool showBackpacks = LootFilter.ShowBackpacks;
             if (ImGui.Checkbox(Loc.WithId("Show Backpacks##ShowBackpacks"), ref showBackpacks))
             {

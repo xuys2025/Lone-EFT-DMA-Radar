@@ -134,7 +134,7 @@ namespace LoneEftDmaRadar.UI.ColorPicker
                     var currentColor = GetCurrentColor(option);
                     ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(currentColor.X, currentColor.Y, currentColor.Z, 1f));
 
-                    if (ImGui.Selectable($"● {name}", isSelected))
+                    if (ImGui.Selectable($"* {name}", isSelected))
                     {
                         _selectedOption = option;
                         _editingColor = currentColor;
@@ -239,10 +239,10 @@ namespace LoneEftDmaRadar.UI.ColorPicker
                 ColorPickerOption.LocalPlayer => SKColors.Green,
                 ColorPickerOption.FriendlyPlayer => SKColors.LimeGreen,
                 ColorPickerOption.PMCPlayer => SKColors.Red,
-                ColorPickerOption.ScavPlayer => SKColors.Yellow,
-                ColorPickerOption.HumanScavPlayer => SKColors.White,
+                ColorPickerOption.HumanScavPlayer => SKColors.Yellow,
+                ColorPickerOption.ScavPlayer => SKColors.White,
                 ColorPickerOption.BossPlayer => SKColors.Fuchsia,
-                ColorPickerOption.RaiderPlayer => SKColor.Parse("ffc70f"),
+                ColorPickerOption.RaiderPlayer => SKColors.Violet,
                 ColorPickerOption.FocusedPlayer => SKColors.Coral,
                 ColorPickerOption.RegularLoot => SKColors.WhiteSmoke,
                 ColorPickerOption.ValuableLoot => SKColors.Turquoise,

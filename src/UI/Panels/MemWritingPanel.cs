@@ -12,20 +12,21 @@ namespace LoneEftDmaRadar.UI.Panels
             _config = config;
         }
 
-        public string Title => Loc.T("Memory Writing");
+        public string Title => Loc.Title("Memory Writing");
 
         public bool IsVisible { get; set; } = true;
 
         public void Render()
         {
             if (!IsVisible) return;
-
-            ImGui.SetNextWindowSize(new System.Numerics.Vector2(300, 150), ImGuiCond.FirstUseEver);
             
-            // NoClose flag is not directly available in ImGui.Begin(string name, flags). 
-            // If we don't pass a ref bool p_open, there is no close button.
-            // We want it to be collapsible, so we don't use NoCollapse.
-            if (ImGui.Begin(Title)) 
+            // Temporarily enable collapse button for this window
+            ImGuiStylePtr style = ImGui.GetStyle();
+            ImGuiDir prevDir = style.WindowMenuButtonPosition;
+            style.WindowMenuButtonPosition = ImGuiDir.Left;
+
+            var flags = ImGuiWindowFlags.AlwaysAutoResize;
+            if (ImGui.Begin(Title, flags)) 
             {
                 bool noRecoil = _config.Misc.NoRecoil;
                 if (ImGui.Checkbox(Loc.T("No Recoil"), ref noRecoil))
@@ -52,6 +53,8 @@ namespace LoneEftDmaRadar.UI.Panels
                     ImGui.SetTooltip(Loc.T("Prevents being kicked for inactivity in menu"));
             }
             ImGui.End();
+
+            style.WindowMenuButtonPosition = prevDir;
         }
     }
 }

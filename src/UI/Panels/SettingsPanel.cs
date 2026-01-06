@@ -212,17 +212,6 @@ namespace LoneEftDmaRadar.UI.Panels
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Scale player icons on the map"));
 
-                // Map Rotation
-                int mapRotation = Config.UI.MapRotation;
-                ImGui.Text(Loc.T("Map Rotation"));
-                if (ImGui.RadioButton("0°", mapRotation == 0)) Config.UI.MapRotation = 0;
-                ImGui.SameLine();
-                if (ImGui.RadioButton("90°", mapRotation == 90)) Config.UI.MapRotation = 90;
-                ImGui.SameLine();
-                if (ImGui.RadioButton("180°", mapRotation == 180)) Config.UI.MapRotation = 180;
-                ImGui.SameLine();
-                if (ImGui.RadioButton("270°", mapRotation == 270)) Config.UI.MapRotation = 270;
-
                 // Zoom
                 int zoom = Config.UI.Zoom;
                 if (ImGui.SliderInt(Loc.T("Zoom (F1/F2)"), ref zoom, 1, 200))
