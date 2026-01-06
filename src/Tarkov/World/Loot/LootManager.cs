@@ -47,6 +47,12 @@ namespace LoneEftDmaRadar.Tarkov.World.Loot
         /// All loot (with filter applied).
         /// </summary>
         public IReadOnlyList<LootItem> FilteredLoot { get; private set; }
+
+        /// <summary>
+        /// All raw loot items in the raid.
+        /// </summary>
+        public IEnumerable<LootItem> LootItems => _loot.Values;
+
         /// <summary>
         /// All Static Containers on the map.
         /// </summary>
@@ -73,7 +79,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Loot
                 {
                     var filter = LootFilter.Create();
                     FilteredLoot = _loot.Values?
-                        .Where(x => filter(x))
+                        .Where(x => x.ForceShow || filter(x))
                         .OrderBy(x => x.Important)
                         .ThenBy(x => x?.Price ?? 0)
                         .ToList();

@@ -248,6 +248,9 @@
     "Anti-AFK": "防挂机 (Anti-AFK)",
     "Prevents being kicked for inactivity in menu": "防止在菜单中因长时间不活动被踢出",
       "Always Show Map Labels": "总是显示地图标签",
-  "Always display names for Exfils, Quests, and Containers": "总是显示撤离点、任务和容器的名称"
+  "Always display names for Exfils, Quests, and Containers": "总是显示撤离点、任务和容器的名称",
+  "Raid Loot": "战局物资",
+  "Search...": "搜索...",
+  "Force show on map (Overrides filter)": "强制在地图上显示 (覆盖过滤器)"
 }
 

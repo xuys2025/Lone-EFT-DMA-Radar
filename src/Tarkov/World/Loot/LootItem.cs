@@ -41,6 +41,11 @@ namespace LoneEftDmaRadar.Tarkov.World.Loot
         private static EftDmaConfig Config { get; } = Program.Config;
         private readonly TarkovMarketItem _item;
 
+        /// <summary>
+        /// Manually forced to be shown on map (per raid).
+        /// </summary>
+        public bool ForceShow { get; set; }
+
         public LootItem(TarkovMarketItem item, Vector3 position)
         {
             ArgumentNullException.ThrowIfNull(item, nameof(item));

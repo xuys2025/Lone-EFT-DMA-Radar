@@ -169,12 +169,14 @@ namespace LoneEftDmaRadar.UI
             SettingsPanel.Initialize();
             LootFiltersPanel.Initialize();
             _memWritingPanel = new MemWritingPanel(Config);
+            _inRaidLootPanel = new InRaidLootPanel();
 
             // Initialize widgets
             AimviewWidget.Initialize(_gl, _grContext);
         }
 
         private static MemWritingPanel _memWritingPanel;
+        private static InRaidLootPanel _inRaidLootPanel;
 
         private static void CreateSkiaSurface()
         {
@@ -418,6 +420,13 @@ namespace LoneEftDmaRadar.UI
                     if (!item.IsImportant) // Draw normal loot first
                         item.Draw(canvas, mapParams, localPlayer);
                 }
+            }
+            
+            // Draw Item Finder Indicator
+            if (LoneEftDmaRadar.UI.Misc.LootFinder.GetActiveTarget() is Vector3 targetPos)
+            {
+                var screenPos = targetPos.ToMapPos(mapParams.Map).ToZoomedPos(mapParams);
+                DrawFinderArrow(canvas, screenPos);
             }
 
             // Draw containers
@@ -833,6 +842,9 @@ namespace LoneEftDmaRadar.UI
             // Memory Writing Panel (Always visible, collapsible)
             _memWritingPanel.Render();
 
+            // In-Raid Loot Panel (Always visible, collapsible, bottom-left)
+            _inRaidLootPanel.Render();
+
 
             // Web Radar Window
             if (_isWebRadarOpen)
@@ -924,7 +936,7 @@ namespace LoneEftDmaRadar.UI
         private static int _fps;
         private static bool _isLootFiltersOpen;
         private static bool _isWebRadarOpen;
-        private static bool _isMapFreeEnabled;
+        private static bool _isMapFreeEnabled = true;
         private static Vector2 _mapPanPosition;
 
 
@@ -1505,5 +1517,81 @@ namespace LoneEftDmaRadar.UI
         }
         #endregion
 
+        private static void DrawFinderArrow(SKCanvas canvas, SKPoint pos)
+        {
+            // 更快的闪烁频率（每秒6次）使其更醒目
+            float alpha = (float)(Math.Abs(Math.Sin(DateTime.Now.TimeOfDay.TotalSeconds * 6)));
+            byte alphaByte = (byte)(Math.Clamp(alpha * 255 + 80, 80, 255)); // 最小透明度80，确保始终可见
+
+            // 绘制外发光效果（大圆环）
+            using (var glowPaint = new SKPaint
+            {
+                Color = new SKColor(255, 100, 100, (byte)(alphaByte / 3)),
+                Style = SKPaintStyle.Stroke,
+                StrokeWidth = 8,
+                IsAntialias = true
+            })
+            {
+                float glowRadius = 50f + alpha * 30f; // 50-80像素扩散
+                canvas.DrawCircle(pos, glowRadius, glowPaint);
+            }
+
+            // 主圆环（更粗更亮）
+            using (var ringPaint = new SKPaint
+            {
+                Color = new SKColor(255, 0, 0, alphaByte),
+                Style = SKPaintStyle.Stroke,
+                StrokeWidth = 5,
+                IsAntialias = true
+            })
+            {
+                float radius = 30f + (1 - alpha) * 20f; // 30-50像素
+                canvas.DrawCircle(pos, radius, ringPaint);
+            }
+
+            // 箭头（加大尺寸，3倍大）
+            float arrowLen = 120f;   // 从40增加到120
+            float arrowWidth = 60f;  // 从20增加到60
+            float offset = 15f;
+
+            using var arrowPaint = new SKPaint
+            {
+                Color = new SKColor(255, 0, 0, alphaByte),
+                Style = SKPaintStyle.Fill,
+                IsAntialias = true
+            };
+
+            using var path = new SKPath();
+            // 箭头尖端
+            path.MoveTo(pos.X, pos.Y - offset);
+            // 左边
+            path.LineTo(pos.X - (arrowWidth / 2), pos.Y - offset - arrowLen);
+            // 右边
+            path.LineTo(pos.X + (arrowWidth / 2), pos.Y - offset - arrowLen);
+            path.Close();
+
+            canvas.DrawPath(path, arrowPaint);
+
+            // 箭头描边（增加对比度）
+            using var outlinePaint = new SKPaint
+            {
+                Color = new SKColor(255, 255, 255, (byte)(alphaByte * 0.8f)),
+                Style = SKPaintStyle.Stroke,
+                StrokeWidth = 3,
+                IsAntialias = true
+            };
+            canvas.DrawPath(path, outlinePaint);
+
+            // 中心点标记（小红圈）
+            using (var dotPaint = new SKPaint
+            {
+                Color = new SKColor(255, 255, 0, 255), // 亮黄色，始终满透明度
+                Style = SKPaintStyle.Fill,
+                IsAntialias = true
+            })
+            {
+                canvas.DrawCircle(pos, 8f, dotPaint);
+            }
+        }
     }
 }
