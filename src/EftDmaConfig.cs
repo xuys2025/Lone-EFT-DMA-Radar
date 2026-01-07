@@ -553,10 +553,9 @@ namespace LoneEftDmaRadar
 
         /// <summary>
         /// Cache information per Raid.
-        /// Key: Raid Id | Value: RaidCache instance
         /// </summary>
-        [JsonPropertyName("raidCache")]
-        public ConcurrentDictionary<int, RaidCache> RaidCache { get; set; } = new();
+        [JsonPropertyName("raidCache_v2")]
+        public RaidCache RaidCache { get; set; } = new();
     }
 
     /// <summary>
@@ -564,6 +563,11 @@ namespace LoneEftDmaRadar
     /// </summary>
     public sealed class RaidCache
     {
+        /// <summary>
+        /// GameWorld Virtual Address this cache is tied to.
+        /// </summary>
+        [JsonPropertyName("gameWorld")]
+        public ulong GameWorld { get; set; }
         /// <summary>
         /// Defines players that are assigned special AI roles.
         /// Key: Player Id | Value: Special AI Role

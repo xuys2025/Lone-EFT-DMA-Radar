@@ -121,6 +121,16 @@ namespace LoneEftDmaRadar.Tarkov.World
                 _explosivesManager = new(gameWorld);
                 Hazards = GetHazards(MapID);
                 Exits = GetExits(MapID, _rgtPlayers.LocalPlayer.IsPmc);
+                // Ensure Cache
+                Config.Cache.RaidCache ??= new();
+                if (Config.Cache.RaidCache.GameWorld != gameWorld)
+                {
+                    Config.Cache.RaidCache = new()
+                    {
+                        GameWorld = gameWorld
+                    };
+                }
+                // Check if raid already started
                 RaidStarted = _rgtPlayers.LocalPlayer.CheckIsRaidStarted() ?? false;
                 if (RaidStarted)
                 {
@@ -461,10 +471,6 @@ namespace LoneEftDmaRadar.Tarkov.World
                 {
                     ai.AssignSpecialAiRole(specialRole);
                 }
-                else if (this.MapID is string map && map == "laboratory" && ai.Type != PlayerType.AIBoss) // Labs Raiders
-                {
-                    ai.AssignSpecialAiRole(new("Raider", PlayerType.AIRaider));
-                }
                 else if (ai.Type == PlayerType.AIScav || ai.Name == "Guard") // Guards
                 {
                     bool isGuard = false;
@@ -511,7 +517,7 @@ namespace LoneEftDmaRadar.Tarkov.World
             if (players.Count == 0)
             {
                 // No players - replace with empty dict
-                Config.Cache.RaidCache[localPlayer.RaidId].Groups = newGroups;
+                Config.Cache.RaidCache.Groups = newGroups;
                 return;
             }
 
@@ -614,7 +620,7 @@ namespace LoneEftDmaRadar.Tarkov.World
             }
 
             // Atomic replacement - swap the entire dict reference
-            Config.Cache.RaidCache[localPlayer.RaidId].Groups = newGroups;
+            Config.Cache.RaidCache.Groups = newGroups;
         }
 
         private void RefreshEquipment(CancellationToken ct)
