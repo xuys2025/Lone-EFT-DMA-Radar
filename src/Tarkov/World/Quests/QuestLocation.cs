@@ -1,4 +1,5 @@
 ﻿using Collections.Pooled;
+using SkiaSharp;
 using LoneEftDmaRadar.Tarkov.Unity;
 using LoneEftDmaRadar.Tarkov.World.Player;
 using LoneEftDmaRadar.UI.Maps;
@@ -63,35 +64,43 @@ namespace LoneEftDmaRadar.Tarkov.World.Quests
         {
             var point = Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams);
             MouseoverPosition = new Vector2(point.X, point.Y);
-            var heightDiff = Position.Y - localPlayer.Position.Y;
-            SKPaints.ShapeOutline.StrokeWidth = 2f;
-            if (heightDiff > 1.45) // marker is above player
-            {
-                using var path = point.GetUpArrow();
-                canvas.DrawPath(path, SKPaints.ShapeOutline);
-                canvas.DrawPath(path, SKPaints.PaintQuestZone);
-            }
-            else if (heightDiff < -1.45) // marker is below player
-            {
-                using var path = point.GetDownArrow();
-                canvas.DrawPath(path, SKPaints.ShapeOutline);
-                canvas.DrawPath(path, SKPaints.PaintQuestZone);
-            }
-            else // marker is level with player
-            {
-                var squareSize = 8 * Program.Config.UI.UIScale;
-                canvas.DrawRect(point.X, point.Y,
-                    squareSize, squareSize, SKPaints.ShapeOutline);
-                canvas.DrawRect(point.X, point.Y,
-                    squareSize, squareSize, SKPaints.PaintQuestZone);
-            }
 
+            float scale = Program.Config.UI.UIScale;
+            // Radius 4.5f (slightly smaller than player dot ~5.0f)
+            float radius = 4.5f * scale; 
+
+            using var paint = new SKPaint
+            {
+                Color = SKColors.Green,
+                Style = SKPaintStyle.Fill,
+                IsAntialias = true
+            };
+
+            using var outline = new SKPaint
+            {
+                Color = SKColors.Black,
+                Style = SKPaintStyle.Stroke,
+                StrokeWidth = 1f * scale,
+                IsAntialias = true
+            };
+
+            canvas.DrawCircle(point, radius, paint);
+            canvas.DrawCircle(point, radius, outline);
+            
             if (Program.Config.UI.AlwaysShowMapLabels)
             {
-                using var lines = new PooledList<string>();
-                lines.Add(Name);
-                lines.Add($"Type: {Type.ToString()}");
-                Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams).DrawMouseoverText(canvas, lines.Span, drawBackground: false);
+                var font = SKFonts.UIRegular;
+                float yOffset = radius + (2f * scale) + font.Size;
+                
+                // Line 1: Name
+                canvas.DrawText(Name, new SKPoint(point.X, point.Y + yOffset), SKTextAlign.Center, font, SKPaints.TextMouseover);
+                
+                // Line 2: Type & Height
+                float heightDiff = Position.Y - localPlayer.Position.Y;
+                string distinctHeight = heightDiff > 0 ? $"+{heightDiff:F1}" : $"{heightDiff:F1}";
+                string infoText = $"{Type} ({distinctHeight}m)";
+                
+                canvas.DrawText(infoText, new SKPoint(point.X, point.Y + yOffset + font.Spacing), SKTextAlign.Center, font, SKPaints.TextMouseover);
             }
         }
 
