@@ -88,7 +88,8 @@ namespace LoneEftDmaRadar.UI.ColorPicker
                 [ColorPickerOption.FoodFilterLoot] = SKColors.CornflowerBlue.ToString(),
                 [ColorPickerOption.BackpacksFilterLoot] = SKColor.Parse("00b02c").ToString(),
                 [ColorPickerOption.Explosives] = SKColors.OrangeRed.ToString(),
-                [ColorPickerOption.QuestHelperZones] = SKColors.DeepPink.ToString()
+                [ColorPickerOption.QuestHelperZones] = SKColors.DeepPink.ToString(),
+                [ColorPickerOption.MapPing] = SKColors.Turquoise.ToString(),
             };
         }
 
@@ -218,6 +219,7 @@ namespace LoneEftDmaRadar.UI.ColorPicker
                 ColorPickerOption.Corpse => Loc.T("Corpse"),
                 ColorPickerOption.DeathMarker => Loc.T("Death Marker"),
                 ColorPickerOption.Explosives => Loc.T("Explosives"),
+                ColorPickerOption.MapPing => Loc.T("Map Ping"),
                 _ => option.ToString()
             };
         }
@@ -256,6 +258,7 @@ namespace LoneEftDmaRadar.UI.ColorPicker
                 ColorPickerOption.QuestHelperItems => SKColors.YellowGreen,
                 ColorPickerOption.QuestHelperZones => SKColors.DeepPink,
                 ColorPickerOption.Explosives => SKColors.OrangeRed,
+                ColorPickerOption.MapPing => SKColors.Turquoise,
                 _ => SKColors.White
             };
 
@@ -347,6 +350,9 @@ namespace LoneEftDmaRadar.UI.ColorPicker
                     break;
                 case ColorPickerOption.ContainerLoot:
                     SKPaints.PaintContainerLoot.Color = skColor;
+                    break;
+                case ColorPickerOption.MapPing:
+                    SKPaints.PaintMapPing.Color = skColor;
                     break;
             }
         }

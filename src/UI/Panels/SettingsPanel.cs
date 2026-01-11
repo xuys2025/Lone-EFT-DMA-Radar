@@ -260,6 +260,14 @@ namespace LoneEftDmaRadar.UI.Panels
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Displays a list of nearby players with details"));
 
+                bool lootWidget = Config.LootWidget.Enabled;
+                if (ImGui.Checkbox(Loc.T("Loot Widget"), ref lootWidget))
+                {
+                    Config.LootWidget.Enabled = lootWidget;
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.T("Displays a sortable table of filtered loot items"));
+
                 ImGui.SeparatorText(Loc.T("Visibility"));
 
                 bool showExfils = Config.UI.ShowExfils;

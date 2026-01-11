@@ -173,6 +173,7 @@ namespace LoneEftDmaRadar.UI
 
             // Initialize widgets
             AimviewWidget.Initialize(_gl, _grContext);
+            LootWidget.Initialize();
         }
 
         private static MemWritingPanel _memWritingPanel;
@@ -540,6 +541,11 @@ namespace LoneEftDmaRadar.UI
 
             // --- LAYER 4: Top Priority (Overlays, LocalPlayer, HUD) ---
 
+            // Draw Map Pings
+            foreach (var ping in _activeMapPings.Values)
+            {
+                ping.Draw(canvas, mapParams, localPlayer);
+            }
             // Draw group connectors
             if (Program.Config.UI.ConnectGroups && allPlayers is not null)
             {
@@ -782,9 +788,8 @@ namespace LoneEftDmaRadar.UI
             try
             {
                 // Draw overlay controls
-                RadarOverlayPanel.DrawTopBar();
-                RadarOverlayPanel.DrawLootOverlay();
-                RadarOverlayPanel.DrawMapSetupHelper();
+                RadarMenuPanel.Draw();
+                MapSetupHelperPanel.DrawOverlay();
 
                 // Draw main menu bar
                 if (ImGui.BeginMainMenuBar())
@@ -876,11 +881,16 @@ namespace LoneEftDmaRadar.UI
                 AimviewWidget.Draw();
             }
 
-
             // Player Info Widget
             if (PlayerInfoWidget.IsOpen && InRaid)
             {
                 PlayerInfoWidget.Draw();
+            }
+
+            // Loot Widget
+            if (LootWidget.IsOpen && InRaid && Config.Loot.Enabled)
+            {
+                LootWidget.Draw();
             }
         }
 
@@ -926,6 +936,7 @@ namespace LoneEftDmaRadar.UI
         #region UI State and Events
 
         private static readonly PeriodicTimer _fpsTimer = new(TimeSpan.FromSeconds(1));
+        private static readonly ConcurrentDictionary<IMapEntity, MapPingEffect> _activeMapPings = new();
         private static int _fpsCounter = 0;
         private static int _statusOrder = 1;
         private static bool _mouseDown;
@@ -939,6 +950,64 @@ namespace LoneEftDmaRadar.UI
         private static bool _isMapFreeEnabled = true;
         private static Vector2 _mapPanPosition;
 
+        /// <summary>
+        /// Ping a map entity with an expanding circle effect.
+        /// </summary>
+        /// <param name="entity">Entity to be pinged.</param>
+        public static void PingMapEntity(IMapEntity entity)
+        {
+            _ = _activeMapPings.GetOrAdd(entity, e =>
+            {
+                return new MapPingEffect(e);
+            });
+        }
+
+        private readonly struct MapPingEffect : IMapEntity
+        {
+            // Based on implementation from https://github.com/dma-educational-resources/eft-dma-radar
+            private static readonly long _duration = TimeSpan.FromSeconds(2).Ticks;
+            private readonly IMapEntity _entity;
+            private readonly long _start;
+
+            public MapPingEffect(IMapEntity entity)
+            {
+                _entity = entity;
+                _start = Stopwatch.GetTimestamp();
+            }
+
+            public ref readonly Vector3 Position => ref _entity.Position;
+
+            public void Draw(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)
+            {
+                if (_entity is LootItem && !Config.Loot.Enabled) // Don't draw ping if loot is disabled
+                    return;
+                var now = Stopwatch.GetTimestamp();
+                var elapsedTicks = now - _start;
+
+                if (elapsedTicks >= _duration)
+                {
+                    _activeMapPings.TryRemove(_entity, out _);
+                    return;
+                }
+
+                float progress = (float)elapsedTicks / _duration;
+                float radius = 10 + 50 * progress;
+                float alpha = 1f - progress;
+
+                var center = _entity.Position.ToMapPos(mapParams.Map).ToZoomedPos(mapParams);
+
+                using var paint = new SKPaint
+                {
+                    Style = SKPaintStyle.Stroke,
+                    StrokeWidth = 4 * Config.UI.UIScale,
+                    Color = SKPaints.PaintMapPing.Color.WithAlpha((byte)(alpha * 255)),
+                    IsAntialias = true
+                };
+
+                canvas.DrawCircle(center.X, center.Y, radius, paint);
+                _activeMapPings.TryAdd(_entity, this);
+            }
+        }
 
         private static void OnResize(Vector2D<int> size)
         {
@@ -1002,9 +1071,6 @@ namespace LoneEftDmaRadar.UI
                     player.SetFocus(!player.IsFocused);
                 }
             }
-
-            // Hide loot overlay on mouse down
-            RadarOverlayPanel.HideLootOverlay();
         }
 
         private static void OnMouseUp(IMouse mouse, MouseButton button)
@@ -1234,6 +1300,13 @@ namespace LoneEftDmaRadar.UI
         {
             if (isKeyDown)
                 Config.InfoWidget.Enabled = !Config.InfoWidget.Enabled;
+        }
+
+        [Hotkey("Toggle Loot Widget")]
+        private static void ToggleLootWidget_HotkeyStateChanged(bool isKeyDown)
+        {
+            if (isKeyDown)
+                Config.LootWidget.Enabled = !Config.LootWidget.Enabled;
         }
 
         [Hotkey("Toggle Show Meds")]
