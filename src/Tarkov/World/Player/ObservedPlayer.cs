@@ -44,6 +44,10 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         /// Player's Unique Id within this Raid Instance [Human Players Only].
         /// </summary>
         public int Id { get; }
+        /// <summary>
+        /// Player's Account ID string (External).
+        /// </summary>
+        public string AccountId { get; }
         private string _specialName; // Backing field for special roles
         /// <summary>
         /// Player's In-Game Name as displayed on the Radar.
@@ -134,6 +138,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
             bool isAI = Memory.ReadValue<bool>(this + Offsets.ObservedPlayerView.IsAI);
             IsHuman = !isAI;
             Id = GetPlayerId();
+            AccountId = GetAccountID();
             /// Determine Player Type
             PlayerSide = (Enums.EPlayerSide)Memory.ReadValue<int>(this + Offsets.ObservedPlayerView.Side); // Usec,Bear,Scav,etc.
             if (!Enum.IsDefined(PlayerSide)) // Make sure PlayerSide is valid
@@ -247,6 +252,25 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         private int GetPlayerId()
         {
             return Memory.ReadValueEnsure<int>(this + Offsets.ObservedPlayerView.Id);
+        }
+
+        /// <summary>
+        /// Get Player's Account ID.
+        /// </summary>
+        /// <returns>Account ID Numeric String.</returns>
+        private string GetAccountID()
+        {
+            try
+            {
+                if (!IsHuman)
+                    return "AI";
+                var idPTR = Memory.ReadPtr(this + Offsets.ObservedPlayerView.AccountId);
+                return Memory.ReadUnityString(idPTR);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         /// <summary>

@@ -27,6 +27,7 @@ SOFTWARE.
 */
 
 using ImGuiNET;
+using LoneEftDmaRadar.UI.Localization;
 
 namespace LoneEftDmaRadar.UI.Panels
 {
@@ -76,7 +77,41 @@ namespace LoneEftDmaRadar.UI.Panels
                     ImGui.PopStyleColor(3);
                 }
 
+                ImGui.SameLine();
+
+                // Map Rotation
+                ImGui.Text(Loc.T("Map Rotation"));
+                ImGui.SameLine();
+
+                DrawRotRadio(0, "0°");
+                ImGui.SameLine();
+                DrawRotRadio(90, "90°");
+                ImGui.SameLine();
+                DrawRotRadio(180, "180°");
+                ImGui.SameLine();
+                DrawRotRadio(270, "270°");
+
                 ImGui.End();
+            }
+        }
+
+        private static void DrawRotRadio(int angle, string label)
+        {
+            bool isSelected = Config.UI.MapRotation == angle;
+            if (isSelected)
+            {
+                ImGui.PushStyleColor(ImGuiCol.CheckMark, new Vector4(0.0f, 1.0f, 1.0f, 1.0f)); // Cyan
+                ImGui.PushStyleColor(ImGuiCol.Text, new Vector4(0.0f, 1.0f, 1.0f, 1.0f)); // Cyan Text
+            }
+
+            if (ImGui.RadioButton(label, isSelected))
+            {
+                Config.UI.MapRotation = angle;
+            }
+
+            if (isSelected)
+            {
+                ImGui.PopStyleColor(2);
             }
         }
     }

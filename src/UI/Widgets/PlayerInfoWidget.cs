@@ -112,15 +112,16 @@ namespace LoneEftDmaRadar.UI.Widgets
                                                ImGuiTableFlags.SizingFixedFit |
                                                ImGuiTableFlags.NoPadOuterX;
 
-            if (ImGui.BeginTable("PlayersTable", 6, tableFlags))
+            if (ImGui.BeginTable("PlayersTable", 7, tableFlags))
             {
                 // New compact column layout
-                ImGui.TableSetupColumn(Loc.T("Name"), ImGuiTableColumnFlags.WidthFixed, 65f);
-                ImGui.TableSetupColumn(Loc.T("Grp"), ImGuiTableColumnFlags.WidthFixed, 25f);
-                ImGui.TableSetupColumn(Loc.T("In Hands"), ImGuiTableColumnFlags.WidthFixed, 115f);
-                ImGui.TableSetupColumn(Loc.T("Secure"), ImGuiTableColumnFlags.WidthFixed, 45f);
-                ImGui.TableSetupColumn(Loc.T("Value"), ImGuiTableColumnFlags.WidthFixed, 45f);
-                ImGui.TableSetupColumn(Loc.T("Dist"), ImGuiTableColumnFlags.WidthFixed, 35f);
+                ImGui.TableSetupColumn(Loc.T("AID"), ImGuiTableColumnFlags.WidthFixed, 60f); // Added AID column
+                ImGui.TableSetupColumn(Loc.T("Name"), ImGuiTableColumnFlags.WidthFixed, 100f);
+                ImGui.TableSetupColumn(Loc.T("Grp"), ImGuiTableColumnFlags.WidthFixed, 35f);
+                ImGui.TableSetupColumn(Loc.T("In Hands"), ImGuiTableColumnFlags.WidthFixed, 150f);
+                ImGui.TableSetupColumn(Loc.T("Secure"), ImGuiTableColumnFlags.WidthFixed, 65f);
+                ImGui.TableSetupColumn(Loc.T("Value"), ImGuiTableColumnFlags.WidthFixed, 65f);
+                ImGui.TableSetupColumn(Loc.T("Dist"), ImGuiTableColumnFlags.WidthFixed, 45f);
                 ImGui.TableHeadersRow();
 
                 foreach (var player in filteredPlayers.Span)
@@ -133,8 +134,9 @@ namespace LoneEftDmaRadar.UI.Widgets
                     ImGui.TableNextColumn();
 
                     ImGui.PushID(player.Id);
+                    
+                    // Column 0: AID (with ID for selection)
                     _ = ImGui.Selectable("##row", ref rowSelected, ImGuiSelectableFlags.SpanAllColumns | ImGuiSelectableFlags.AllowDoubleClick);
-
                     if (ImGui.IsItemHovered())
                     {
                         if (ImGui.IsMouseDoubleClicked(ImGuiMouseButton.Left))
@@ -146,28 +148,44 @@ namespace LoneEftDmaRadar.UI.Widgets
                             player.SetFocus(!player.IsFocused);
                         }
                     }
-
-                    // Render row contents on top of the selectable.
                     ImGui.SameLine();
+                    
+                    // Display AccountId string if available, otherwise display Id (int) or '--'
+                    string aidText = "--";
+                    if (player is ObservedPlayer op)
+                    {
+                        if (!string.IsNullOrEmpty(op.AccountId))
+                            aidText = op.AccountId;
+                        else
+                            aidText = $"{op.Id}"; // Fallback to int ID
+                    }
+                    else
+                    {
+                         aidText = player.Base.ToString("X");
+                    }
+                    ImGui.TextColored(rowColor, aidText);
+
+                    // Column 1: Name
+                    ImGui.TableNextColumn();
                     ImGui.TextColored(rowColor, player.Name ?? "--");
 
-                    // Column 1: Group
+                    // Column 2: Group
                     ImGui.TableNextColumn();
                     ImGui.TextColored(rowColor, player.GroupId == AbstractPlayer.SoloGroupId ? "--" : player.GroupId.ToString());
 
-                    // Column 2: In Hands
+                    // Column 3: In Hands
                     ImGui.TableNextColumn();
                     ImGui.TextColored(rowColor, player.Equipment?.InHands?.ShortName ?? "--");
 
-                    // Column 3: Secure
+                    // Column 4: Secure
                     ImGui.TableNextColumn();
                     ImGui.TextColored(rowColor, player.Equipment?.SecuredContainer?.ShortName ?? "--");
 
-                    // Column 4: Value
+                    // Column 5: Value
                     ImGui.TableNextColumn();
                     ImGui.TextColored(rowColor, Utilities.FormatNumberKM(player.Equipment?.Value ?? 0).ToString() ?? "--");
 
-                    // Column 5: Dist
+                    // Column 6: Dist
                     ImGui.TableNextColumn();
                     ImGui.TextColored(rowColor, ((int)Vector3.Distance(player.Position, localPlayer.Position)).ToString());
 
