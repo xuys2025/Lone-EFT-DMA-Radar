@@ -54,35 +54,50 @@ namespace LoneEftDmaRadar.Tarkov.World.Exits
 
         public string Name { get; }
         public EStatus Status { get; private set; } = EStatus.Closed;
+        
+        /// <summary>
+        /// Alert manager for status change notifications.
+        /// </summary>
+        public static ExfilAlertManager AlertManager { get; set; }
 
         public void Update(SDK.Enums.EExfiltrationStatus status)
         {
+            var oldStatus = Status;
+            EStatus newStatus;
+            
             switch (status)
             {
                 case SDK.Enums.EExfiltrationStatus.NotPresent:
-                    Status = EStatus.Closed;
+                    newStatus = EStatus.Closed;
                     break;
                 case SDK.Enums.EExfiltrationStatus.UncompleteRequirements:
-                    Status = EStatus.Pending;
+                    newStatus = EStatus.Pending;
                     break;
                 case SDK.Enums.EExfiltrationStatus.Countdown:
-                    Status = EStatus.Open;
+                    newStatus = EStatus.Open;
                     break;
                 case SDK.Enums.EExfiltrationStatus.RegularMode:
-                    Status = EStatus.Open;
+                    newStatus = EStatus.Open;
                     break;
                 case SDK.Enums.EExfiltrationStatus.Pending:
-                    Status = EStatus.Pending;
+                    newStatus = EStatus.Pending;
                     break;
                 case SDK.Enums.EExfiltrationStatus.AwaitsManualActivation:
-                    Status = EStatus.Pending;
+                    newStatus = EStatus.Pending;
                     break;
                 case SDK.Enums.EExfiltrationStatus.Postponed:
-                    Status = EStatus.Pending;
+                    newStatus = EStatus.Pending;
                     break;
                 default:
-                    Status = EStatus.Closed;
+                    newStatus = EStatus.Closed;
                     break;
+            }
+            
+            // Update status and notify if changed
+            if (oldStatus != newStatus)
+            {
+                Status = newStatus;
+                AlertManager?.OnExfilStatusChanged(Name, oldStatus, newStatus);
             }
         }
 

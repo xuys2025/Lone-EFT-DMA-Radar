@@ -322,6 +322,8 @@ namespace LoneEftDmaRadar.DMA
         private static void Memory_RaidStarted(object sender, EventArgs e)
         {
             GCSettings.LatencyMode = GCLatencyMode.SustainedLowLatency;
+            LoneEftDmaRadar.Misc.VoiceManager.Play("000RAID_START", true);
+            LoneEftDmaRadar.Misc.VoiceManager.Play("战局开始，祝你好运");
         }
 
         private static void MemDMA_RaidStopped(object sender, EventArgs e)

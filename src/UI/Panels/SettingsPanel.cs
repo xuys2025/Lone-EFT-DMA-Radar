@@ -143,6 +143,16 @@ namespace LoneEftDmaRadar.UI.Panels
                 if (ImGui.IsItemHovered())
                     ImGui.SetTooltip(Loc.T("Switch UI language between English and Chinese"));
 
+                ImGui.SeparatorText(Loc.T("Voice Alerts"));
+
+                bool voiceEnabled = Config.Voice.Enabled;
+                if (ImGui.Checkbox(Loc.T("Enable Voice Alerts"), ref voiceEnabled))
+                {
+                    Config.Voice.Enabled = voiceEnabled;
+                }
+                if (ImGui.IsItemHovered())
+                    ImGui.SetTooltip(Loc.T("Enable audio voice alerts for important events (Boss spawns, grenades, etc.)"));
+
                 ImGui.SeparatorText(Loc.T("Tools"));
 
                 if (ImGui.Button(Loc.T("Hotkey Manager")))

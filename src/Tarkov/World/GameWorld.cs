@@ -60,6 +60,10 @@ namespace LoneEftDmaRadar.Tarkov.World
 
         private readonly RegisteredPlayers _rgtPlayers;
         private readonly ExplosivesManager _explosivesManager;
+        private readonly HazardsAlertManager _hazardsAlertManager;
+        private readonly PMCProximityAlertManager _pmcProximityAlertManager;
+        private readonly AimingAlertManager _aimingAlertManager;
+        private readonly Exits.ExfilAlertManager _exfilAlertManager;
         private readonly WorkerThread _t1;
         private readonly WorkerThread _t2;
         private readonly WorkerThread _t3;
@@ -120,7 +124,14 @@ namespace LoneEftDmaRadar.Tarkov.World
                 Loot = new(gameWorld);
                 _explosivesManager = new(gameWorld);
                 Hazards = GetHazards(MapID);
+                _hazardsAlertManager = new(Hazards);
+                _pmcProximityAlertManager = new();
+                _aimingAlertManager = new();
                 Exits = GetExits(MapID, _rgtPlayers.LocalPlayer.IsPmc);
+                
+                // Initialize exfil alert manager
+                _exfilAlertManager = new Exits.ExfilAlertManager();
+                LoneEftDmaRadar.Tarkov.World.Exits.Exfil.AlertManager = _exfilAlertManager;
                 // Ensure Cache
                 Config.Cache.RaidCache ??= new();
                 if (Config.Cache.RaidCache.GameWorld != gameWorld)
@@ -135,6 +146,7 @@ namespace LoneEftDmaRadar.Tarkov.World
                 if (RaidStarted)
                 {
                     Logging.WriteLine("[GameWorld] Raid has already started!");
+                    _exfilAlertManager?.OnRaidStarted();
                 }
             }
             catch
@@ -425,6 +437,7 @@ namespace LoneEftDmaRadar.Tarkov.World
                 if (RaidStarted)
                 {
                     Logging.WriteLine("[PreRaidStartChecks] Raid has started!");
+                    _exfilAlertManager?.OnRaidStarted();
                 }
                 if (!RaidStarted && !localPlayer.IsScav)
                 {
@@ -676,11 +689,14 @@ namespace LoneEftDmaRadar.Tarkov.World
         #region Explosives Thread T3
 
         /// <summary>
-        /// Managed Worker Thread that does Explosives (grenades,etc.) updates.
+        /// Managed Worker Thread that does Explosives (grenades,etc.), Hazards, PMC Proximity, and Aiming updates.
         /// </summary>
         private void ExplosivesWorker_PerformWork(object sender, WorkerThreadArgs e)
         {
             _explosivesManager.Refresh(e.CancellationToken);
+            _hazardsAlertManager?.Update(_rgtPlayers?.LocalPlayer);
+            _pmcProximityAlertManager?.Update(_rgtPlayers, _rgtPlayers?.LocalPlayer);
+            _aimingAlertManager?.Update(_rgtPlayers, _rgtPlayers?.LocalPlayer);
         }
 
         #endregion

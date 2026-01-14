@@ -29,6 +29,7 @@ SOFTWARE.
 using Collections.Pooled;
 using LoneEftDmaRadar.Tarkov.Unity.Collections;
 using LoneEftDmaRadar.Tarkov.World.Player;
+using LoneEftDmaRadar.Tarkov.World.Player.Helpers;
 
 namespace LoneEftDmaRadar.Tarkov.World
 {
@@ -75,7 +76,25 @@ namespace LoneEftDmaRadar.Tarkov.World
                     if (playerBase == LocalPlayer) // Skip LocalPlayer, already allocated
                         continue;
                     // Add new player
+                    bool isNew = !_players.ContainsKey(playerBase);
                     AbstractPlayer.Allocate(_players, playerBase, _game);
+                    
+                    // Voice alert for newly spawned bosses
+                    if (isNew && _players.TryGetValue(playerBase, out var player))
+                    {
+                        if (player is ObservedPlayer observedPlayer)
+                        {
+                            if (observedPlayer.Type == PlayerType.AIBoss)
+                            {
+                                LoneEftDmaRadar.Misc.VoiceManager.Play($"发现{observedPlayer.Name}");
+                            }
+                            else if (observedPlayer.Type == PlayerType.AIRaider && 
+                                (observedPlayer.Name == "Knight" || observedPlayer.Name == "Birdeye" || observedPlayer.Name == "Big Pipe"))
+                            {
+                                LoneEftDmaRadar.Misc.VoiceManager.Play($"发现{observedPlayer.Name}");
+                            }
+                        }
+                    }
                 }
                 /// Update Existing Players incl LocalPlayer
                 UpdateExistingPlayers(registered);
@@ -126,6 +145,9 @@ namespace LoneEftDmaRadar.Tarkov.World
                 var btr = new BtrPlayer(btrView, btrPlayerBase, _game);
                 _players[btrPlayerBase] = btr;
                 Logging.WriteLine("BTR Allocated!");
+                
+                // Voice alert for BTR detection
+                LoneEftDmaRadar.Misc.VoiceManager.Play("发现BTR");
             }
         }
 

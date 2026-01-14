@@ -247,7 +247,11 @@ namespace LoneEftDmaRadar.Tarkov.World.Loot
                     {
                         if (p.ObjectName.Equals("loot_collider", StringComparison.OrdinalIgnoreCase))
                         {
-                            _ = _loot.TryAdd(p.ItemBase, new LootAirdrop(pos));
+                            if (_loot.TryAdd(p.ItemBase, new LootAirdrop(pos)))
+                            {
+                                // Voice alert for airdrop detection (only on first detection)
+                                LoneEftDmaRadar.Misc.VoiceManager.Play("发现空投");
+                            }
                         }
                         else
                         {

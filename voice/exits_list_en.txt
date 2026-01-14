@@ -1,0 +1,140 @@
+factory4_day:
+Cellars
+Gate 3
+Camera Bunker Door
+Office Window
+Gate 0
+Med Tent Gate
+Courtyard Gate
+Smugglers' Passage
+
+bigmap:
+Dorms V-Ex
+Crossroads
+Old Gas Station
+Trailer Park
+RUAF Roadblock
+Military Base CP
+Passage Between Rocks
+Railroad to Military Base
+Old Road Gate
+Sniper Roadblock
+Railroad to Port
+Trailer Park Workers' Shack
+Railroad to Tarkov
+Warehouse 17
+Factory Shacks
+Warehouse 4
+Old Gas Station Gate
+Factory Far Corner
+Administration Gate
+Railroad Passage (Flare)
+Scav Checkpoint
+Boiler Room Basement (Co-op)
+Smugglers' Boat
+Smugglers' Bunker (ZB-1012)
+
+Woods:
+Friendship Bridge (Co-Op)
+RUAF Gate
+UN Roadblock
+Bridge V-Ex
+Outskirts
+Dead Man's Place
+Boat
+Scav House
+Scav Bunker
+Mountain Stash
+Eastern Rocks
+Old Railway Depot
+Northern UN Roadblock
+Power Line Passage (Flare)
+Railway Bridge to Tarkov
+
+Lighthouse:
+Armored Train
+Road to Military Base V-Ex
+Side Tunnel (Co-Op)
+Mountain Pass
+Path to Shoreline
+Northern Checkpoint
+Southern Road
+Southern Road Landslide
+Hideout Under the Landing Stage
+Scav Hideout at the Grotto
+Industrial Zone Gates
+Passage by the Lake
+
+Shoreline:
+Road to North V-Ex
+Road to Customs
+Railway Bridge
+Tunnel
+Path to Lighthouse
+Lighthouse
+Ruined Road
+East Wing Gym Entrance
+Admin Basement
+Smugglers' Path (Co-op)
+Pier Boat
+Climber's Trail
+Mountain Bunker
+
+RezervBase:
+Armored Train
+Bunker Hermetic Door
+Cliff Descent
+Scav Lands (Co-Op)
+Sewer Manhole
+Hole in the Wall by the Mountains
+Heating Pipe
+Depot Hermetic Door
+Checkpoint Fence
+Exit to Woods
+
+Interchange:
+Emercom Checkpoint
+Railway Exfil
+Power Station V-Ex
+Scav Camp (Co-Op)
+Hole in the Fence
+Saferoom Exfil
+
+TarkovStreets:
+Entrance to Catacombs
+Ventilation Shaft
+Sewer Manhole
+Near Kamchatskaya Arch
+Cardinal Apartment Complex Parking
+Klimov Shopping Mall Exfil
+Courtyard
+Primorsky Ave Taxi V-Ex
+Stylobate Building Elevator
+Crash Site
+Sewer River
+Damaged House
+Collapsed Crane
+Klimov Street (Flare)
+Pinewood Basement (Co-Op)
+Expo Checkpoint
+Smugglers' Basement
+
+laboratory:
+Medical Block Elevator
+Cargo Elevator
+Main Elevator
+Sewage Conduit
+Parking Gate
+Hangar Gate
+
+Sandbox:
+Police Cordon V-Ex
+Emercom Checkpoint
+Scav Checkpoint (Co-op)
+Nakatani Basement Stairs
+Mira Ave (Flare)
+Tartowers Sales Office
+
+Labyrinth:
+The Way Up
+Ariadne's Path

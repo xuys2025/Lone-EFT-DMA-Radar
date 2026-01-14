@@ -37,6 +37,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Explosives
             Offsets.SynchronizableObjectLogicProcessor._staticSynchronizableObjects];
         private readonly ulong _gameWorld;
         private readonly ConcurrentDictionary<ulong, IExplosiveItem> _explosives = new();
+        private readonly HashSet<ulong> _alerted = new(); // Track alerted explosives
 
         public ExplosivesManager(ulong gameWorld)
         {
@@ -55,6 +56,7 @@ namespace LoneEftDmaRadar.Tarkov.World.Explosives
             {
                 return;
             }
+
             using var scatter = Memory.CreateScatter(VmmSharpEx.Options.VmmFlags.NOCACHE);
             foreach (var explosive in explosives)
             {
@@ -69,6 +71,40 @@ namespace LoneEftDmaRadar.Tarkov.World.Explosives
                 }
             }
             scatter.Execute();
+
+            // Voice Warnings - check after position updates
+            var localPlayer = Memory.LocalPlayer;
+            if (localPlayer is not null && localPlayer.IsAlive)
+            {
+                foreach (var explosive in explosives)
+                {
+                    // Skip if already alerted for this explosive
+                    if (_alerted.Contains(explosive.Addr))
+                        continue;
+
+                    float distance = Vector3.Distance(localPlayer.Position, explosive.Position);
+                    if (distance <= 15f)
+                    {
+                        if (explosive is Grenade)
+                        {
+                            LoneEftDmaRadar.Misc.VoiceManager.Play("000DANGER", true);
+                            LoneEftDmaRadar.Misc.VoiceManager.Play("发现手雷");
+                            _alerted.Add(explosive.Addr);
+                            break; // Alert once per loop is enough
+                        }
+                        else if (explosive is Tripwire)
+                        {
+                            LoneEftDmaRadar.Misc.VoiceManager.Play("000DANGER", true);
+                            LoneEftDmaRadar.Misc.VoiceManager.Play("发现阔剑");
+                            _alerted.Add(explosive.Addr);
+                            break;
+                        }
+                    }
+                }
+
+                // Clean up alerted items that are no longer in explosives list
+                _alerted.RemoveWhere(addr => !_explosives.ContainsKey(addr));
+            }
         }
 
         private void GetGrenades(CancellationToken ct)

@@ -88,6 +88,7 @@ namespace LoneEftDmaRadar
                 SKFonts.ApplyLanguage(Config.UI.Language ?? string.Empty);
                 ServiceProvider = BuildServiceProvider();
                 HttpClientFactory = ServiceProvider.GetRequiredService<IHttpClientFactory>();
+                Misc.VoiceManager.Start();
                 SetHighPerformanceMode();
                 AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
                 AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
@@ -179,6 +180,7 @@ namespace LoneEftDmaRadar
             Logging.WriteLine("Saving Config and Closing DMA Connection...");
             Config.Save();
             Memory.Close();
+            Misc.VoiceManager.Stop();
             Logging.WriteLine("Exiting...");
         }
 

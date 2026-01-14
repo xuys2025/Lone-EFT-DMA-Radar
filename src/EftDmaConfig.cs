@@ -65,6 +65,12 @@ namespace LoneEftDmaRadar
         public MiscConfig Misc { get; set; } = new();
 
         /// <summary>
+        /// Voice Config
+        /// </summary>
+        [JsonPropertyName("voice")]
+        public VoiceConfig Voice { get; set; } = new();
+
+        /// <summary>
         /// Web Radar Config
         /// </summary>
         [JsonPropertyName("webRadar")]
@@ -640,9 +646,15 @@ namespace LoneEftDmaRadar
         public bool NoSway { get; set; } = false;
 
         /// <summary>
-        /// Enables Anti-AFK.
+        /// Anti-AFK.
         /// </summary>
         [JsonPropertyName("antiAfk")]
         public bool AntiAfk { get; set; } = false;
+    }
+
+    public sealed class VoiceConfig
+    {
+        [JsonPropertyName("enabled")]
+        public bool Enabled { get; set; } = true;
     }
 }
