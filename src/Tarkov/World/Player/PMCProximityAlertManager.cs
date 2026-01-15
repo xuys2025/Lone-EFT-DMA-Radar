@@ -10,12 +10,19 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         private const float DISTANCE_200M = 200f;
         private const float DISTANCE_100M = 100f;
         private const float DISTANCE_50M = 50f;
+        private const double ALERT_COOLDOWN_SECONDS = 30.0;
 
         /// <summary>
         /// Tracks the alert level for each hostile PMC.
         /// Key: Player Base Address, Value: Current alert level (0=none, 1=200m, 2=100m, 3=50m)
         /// </summary>
         private readonly Dictionary<ulong, int> _pmcAlertLevels = new();
+
+        /// <summary>
+        /// Tracks the last alert time for each alert level.
+        /// Key: Alert level (1=200m, 2=100m, 3=50m), Value: Last alert timestamp
+        /// </summary>
+        private readonly Dictionary<int, DateTime> _lastAlertTimes = new();
 
         /// <summary>
         /// Updates proximity alerts for hostile PMCs.
@@ -87,10 +94,23 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
 
         /// <summary>
         /// Triggers the appropriate voice alert based on the alert level.
+        /// Enforces a cooldown period to prevent frequent repeated alerts.
         /// </summary>
         /// <param name="level">Alert level (1=200m, 2=100m, 3=50m)</param>
-        private static void TriggerAlert(int level)
+        private void TriggerAlert(int level)
         {
+            // Check if we're still in cooldown period for this alert level
+            if (_lastAlertTimes.TryGetValue(level, out DateTime lastAlertTime))
+            {
+                double secondsSinceLastAlert = (DateTime.UtcNow - lastAlertTime).TotalSeconds;
+                if (secondsSinceLastAlert < ALERT_COOLDOWN_SECONDS)
+                {
+                    // Still in cooldown, skip this alert
+                    return;
+                }
+            }
+
+            // Play the alert and record the timestamp
             switch (level)
             {
                 case 1: // 200 meters
@@ -106,6 +126,9 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
                     Misc.VoiceManager.Play("五十米内有PMC");
                     break;
             }
+
+            // Update the last alert time for this level
+            _lastAlertTimes[level] = DateTime.UtcNow;
         }
     }
 }
