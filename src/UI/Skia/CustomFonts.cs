@@ -33,15 +33,14 @@ namespace LoneEftDmaRadar.UI.Skia
     internal static class CustomFonts
     {
         /// <summary>
-        /// Neo Sans Std Regular
+        /// UI 默认字体（优先使用 HarmonyOS Sans 中文字体，备用 NeoSansStdRegular）
         /// </summary>
         public static SKTypeface NeoSansStdRegular { get; }
 
         public static SKTypeface GetUiTypefaceForLanguage(string language)
         {
-            // Since we are now using HarmonyOS Sans (which supports CJK) as the default "NeoSansStdRegular",
-            // we don't need to force system fonts for Chinese anymore.
-            // This ensures the user's chosen font (Thin) is used.
+            // 使用 HarmonyOS Sans 作为默认字体，支持中英文混合显示
+            // 无需根据语言切换字体，HarmonyOS Sans 对中英文都有良好的支持
             return NeoSansStdRegular;
         }
 
@@ -49,8 +48,8 @@ namespace LoneEftDmaRadar.UI.Skia
         {
             try
             {
-                // Try to load NeoSansStdRegular from embedded resources first
-                using (var stream = Utilities.OpenResource("LoneEftDmaRadar.Resources.NeoSansStdRegular.otf"))
+                // 优先加载 HarmonyOS Sans 中文字体（更好的中英文混合显示效果）
+                using (var stream = Utilities.OpenResource("LoneEftDmaRadar.Resources.HarmonyOS_Sans_SC_Regular.ttf"))
                 {
                     if (stream != null)
                     {
@@ -63,10 +62,10 @@ namespace LoneEftDmaRadar.UI.Skia
             }
             catch
             {
-                // If embedded font fails, try to load HarmonyOS Sans for Chinese support
+                // HarmonyOS Sans 加载失败，尝试备用字体 NeoSansStdRegular
                 try
                 {
-                    using (var stream = Utilities.OpenResource("LoneEftDmaRadar.Resources.HarmonyOS_Sans_SC_Regular.ttf"))
+                    using (var stream = Utilities.OpenResource("LoneEftDmaRadar.Resources.NeoSansStdRegular.otf"))
                     {
                         if (stream != null)
                         {
@@ -79,7 +78,7 @@ namespace LoneEftDmaRadar.UI.Skia
                 }
                 catch
                 {
-                    // Ignore resource load failure and fall back to system fonts
+                    // 嵌入字体都加载失败，回退到系统字体
                 }
             }
 
