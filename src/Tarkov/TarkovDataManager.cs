@@ -26,6 +26,7 @@ SOFTWARE.
  *
 */
 
+using LoneEftDmaRadar.Misc;
 using LoneEftDmaRadar.Misc.JSON;
 using LoneEftDmaRadar.Web.TarkovDev;
 using System.Collections.Frozen;
@@ -197,9 +198,8 @@ namespace LoneEftDmaRadar.Tarkov
         /// <exception cref="InvalidOperationException"></exception>
         private static async Task LoadDefaultDataAsync()
         {
-            const string resource = "LoneEftDmaRadar.DEFAULT_DATA.json";
-            using var dataStream = Assembly.GetExecutingAssembly().GetManifestResourceStream(resource) ??
-                throw new ArgumentNullException(resource);
+            const string resource = "LoneEftDmaRadar.Resources.DEFAULT_DATA.json";
+            using var dataStream = Utilities.OpenResource(resource);
             var data = await JsonSerializer.DeserializeAsync(dataStream, AppJsonContext.Default.DataElement)
                 ?? throw new InvalidOperationException($"Failed to deserialize {nameof(dataStream)}");
             SetData(data);

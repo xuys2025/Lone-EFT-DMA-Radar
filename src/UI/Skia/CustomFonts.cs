@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Lone EFT DMA Radar
  * Brought to you by Lone (Lone DMA)
  * 
@@ -26,6 +26,8 @@ SOFTWARE.
  *
 */
 
+using LoneEftDmaRadar.Misc;
+
 namespace LoneEftDmaRadar.UI.Skia
 {
     internal static class CustomFonts
@@ -47,9 +49,8 @@ namespace LoneEftDmaRadar.UI.Skia
         {
             try
             {
-                // Try to load HarmonyOS Sans SC Regular from Embedded Resource
-                // This ensures the font is packaged with the application
-                using (var stream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("LoneEftDmaRadar.HarmonyOS_Sans_SC_Regular.ttf"))
+                // Try to load NeoSansStdRegular from embedded resources first
+                using (var stream = Utilities.OpenResource("LoneEftDmaRadar.Resources.NeoSansStdRegular.otf"))
                 {
                     if (stream != null)
                     {
@@ -62,7 +63,24 @@ namespace LoneEftDmaRadar.UI.Skia
             }
             catch
             {
-                // Ignore resource load failure and fall back to system fonts
+                // If embedded font fails, try to load HarmonyOS Sans for Chinese support
+                try
+                {
+                    using (var stream = Utilities.OpenResource("LoneEftDmaRadar.Resources.HarmonyOS_Sans_SC_Regular.ttf"))
+                    {
+                        if (stream != null)
+                        {
+                            var fontData = new byte[stream.Length];
+                            stream.ReadExactly(fontData);
+                            NeoSansStdRegular = SKTypeface.FromStream(new MemoryStream(fontData, false));
+                            return;
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore resource load failure and fall back to system fonts
+                }
             }
 
             try

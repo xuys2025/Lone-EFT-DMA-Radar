@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -10,7 +10,7 @@
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <Platforms>x64</Platforms>
 	<ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
-	<ApplicationIcon>..\Resources\lone-icon.ico</ApplicationIcon>
+	<ApplicationIcon>Resources\lone-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
 	<!-- SignalR AOT Compatibility -->
@@ -54,25 +54,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Content Include="..\Resources\Maps.bin">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-			<Visible>false</Visible>
-		</Content>
+		<!-- Embed all resources using wildcard pattern (from upstream) -->
+		<EmbeddedResource Include="..\Resources\**\*.*" />
+		
+		<!-- Voice files should be copied to output directory (for Chinese voice support) -->
 		<Content Include="..\Resources\voice\**\*.wav">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Link>Resources\voice\%(RecursiveDir)%(FileName)%(Extension)</Link>
 		</Content>
-	</ItemGroup>
-
-	<ItemGroup>
-		<EmbeddedResource Include="..\Resources\NeoSansStdRegular.otf" />
-		<EmbeddedResource Include="..\Resources\HarmonyOS_Sans_Regular.ttf" LogicalName="LoneEftDmaRadar.HarmonyOS_Sans_Regular.ttf" />
-		<EmbeddedResource Include="..\Resources\HarmonyOS_Sans_Light.ttf" LogicalName="LoneEftDmaRadar.HarmonyOS_Sans_Light.ttf" />
-		<EmbeddedResource Include="..\Resources\HarmonyOS_Sans_Thin.ttf" LogicalName="LoneEftDmaRadar.HarmonyOS_Sans_Thin.ttf" />
-		<EmbeddedResource Include="..\Resources\HarmonyOS_Sans_SC_Regular.ttf" LogicalName="LoneEftDmaRadar.HarmonyOS_Sans_SC_Regular.ttf" />
-		<EmbeddedResource Include="..\Resources\DEFAULT_DATA.json" />
-		<EmbeddedResource Include="..\Resources\lang\zh-CN.todo.json" LogicalName="LoneEftDmaRadar.Resources.lang.zh-CN.json" />
-		<EmbeddedResource Include="..\Resources\lang\exits.zh-CN.json" LogicalName="LoneEftDmaRadar.Resources.lang.exits.zh-CN.json" />
 	</ItemGroup>
 
   <ItemGroup>
@@ -86,7 +75,7 @@
 	<PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.2.0" />
 	<PackageReference Include="Svg.Skia" Version="3.4.1" />
 	<PackageReference Include="Velopack" Version="0.0.1298" />
-	<PackageReference Include="VmmSharpEx" Version="3.140.2" />
+	<PackageReference Include="VmmSharpEx" Version="3.140.3" />
 	<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	<PackageReference Include="Open.Nat.V2" Version="3.1.1" />
 	<PackageReference Include="System.Windows.Extensions" Version="10.0.0" />

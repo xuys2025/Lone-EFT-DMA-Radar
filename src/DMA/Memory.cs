@@ -28,6 +28,7 @@ SOFTWARE.
 
 global using LoneEftDmaRadar.DMA;
 using Collections.Pooled;
+using LoneEftDmaRadar.UI;
 using LoneEftDmaRadar.UI.Localization;
 using LoneEftDmaRadar.Tarkov.Unity.Structures;
 using LoneEftDmaRadar.Tarkov.World;
@@ -177,6 +178,8 @@ namespace LoneEftDmaRadar.DMA
         private static void MemoryPrimaryWorker()
         {
             Logging.WriteLine("Memory thread starting...");
+            while (RadarWindow.Dispatcher is null)
+                Thread.Sleep(1);
             while (true)
             {
                 try
