@@ -11,10 +11,9 @@ namespace LoneEftDmaRadar.Tarkov.World.Hazards
         [JsonPropertyName("hazardType")]
         public string HazardType { get; set; }
 
-        [JsonPropertyName("position")]
         private Vector3 _position;
 
-        [JsonIgnore]
+        [JsonPropertyName("position")]
         public Vector3 Position 
         { 
             get => _position;
