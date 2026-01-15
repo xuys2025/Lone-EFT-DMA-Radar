@@ -122,20 +122,41 @@ namespace LoneEftDmaRadar.Tarkov.World.Player
         /// </summary>
         private void CheckMultipleAiming(int pmcCount, int scavCount)
         {
-            // Alert for multiple PMCs aiming
+            bool shouldPlayWarningSound = false;
+            bool shouldAlertPMC = false;
+            bool shouldAlertSCAV = false;
+            
+            // Check if we need to alert for multiple PMCs aiming
             if (pmcCount >= MULTIPLE_AIMING_THRESHOLD && !_alertedMultiplePMC)
             {
-                Misc.VoiceManager.Play("000CAUTION", true);
-                Misc.VoiceManager.Play("多个PMC瞄准");
+                shouldPlayWarningSound = true;
+                shouldAlertPMC = true;
                 _alertedMultiplePMC = true;
             }
 
-            // Alert for multiple SCAVs aiming
+            // Check if we need to alert for multiple SCAVs aiming
             if (scavCount >= MULTIPLE_AIMING_THRESHOLD && !_alertedMultipleSCAV)
             {
-                Misc.VoiceManager.Play("000CAUTION", true);
-                Misc.VoiceManager.Play("多个SCAV瞄准");
+                shouldPlayWarningSound = true;
+                shouldAlertSCAV = true;
                 _alertedMultipleSCAV = true;
+            }
+
+            // Only play alerts if there are new threats
+            if (shouldPlayWarningSound)
+            {
+                // Play warning sound once
+                Misc.VoiceManager.Play("000CAUTION", true);
+                
+                // Play specific alerts for newly detected threats
+                if (shouldAlertPMC)
+                {
+                    Misc.VoiceManager.Play("多个PMC瞄准");
+                }
+                if (shouldAlertSCAV)
+                {
+                    Misc.VoiceManager.Play("多个SCAV瞄准");
+                }
             }
         }
 

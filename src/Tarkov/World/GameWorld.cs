@@ -367,8 +367,8 @@ namespace LoneEftDmaRadar.Tarkov.World
                 Memory.LocalPlayer?.RefreshWishlist(ct);
             RefreshEquipment(ct);
             RefreshQuestHelper(ct);
+            PreRaidStartChecks(ct); // Must be called before UpdateExfils to ensure raid start time is set
             UpdateExfils(ct);
-            PreRaidStartChecks(ct);
         }
 
         private void UpdateExfils(CancellationToken ct)

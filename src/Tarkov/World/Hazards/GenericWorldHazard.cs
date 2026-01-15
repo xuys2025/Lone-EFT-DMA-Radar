@@ -1,4 +1,4 @@
-﻿using LoneEftDmaRadar.Misc;
+using LoneEftDmaRadar.Misc;
 using LoneEftDmaRadar.Tarkov.Unity;
 using LoneEftDmaRadar.Tarkov.World.Player;
 using LoneEftDmaRadar.UI.Maps;
@@ -12,13 +12,20 @@ namespace LoneEftDmaRadar.Tarkov.World.Hazards
         public string HazardType { get; set; }
 
         [JsonPropertyName("position")]
-        public Vector3 Position { get; set; }
+        private Vector3 _position;
+
+        [JsonIgnore]
+        public Vector3 Position 
+        { 
+            get => _position;
+            set => _position = value;
+        }
 
         [JsonIgnore]
         public Vector2 MouseoverPosition { get; set; }
 
         [JsonIgnore]
-        ref readonly Vector3 IWorldEntity.Position => throw new NotImplementedException();
+        ref readonly Vector3 IWorldEntity.Position => ref _position;
 
         public void Draw(SKCanvas canvas, EftMapParams mapParams, LocalPlayer localPlayer)
         {

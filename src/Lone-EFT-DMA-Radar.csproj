@@ -56,6 +56,7 @@
 	<ItemGroup>
 		<!-- Embed all resources using wildcard pattern (from upstream) -->
 		<EmbeddedResource Include="..\Resources\**\*.*" />
+		<EmbeddedResource Include="Resources\**\*.*" />
 		
 		<!-- Voice files should be copied to output directory (for Chinese voice support) -->
 		<Content Include="..\Resources\voice\**\*.wav">
