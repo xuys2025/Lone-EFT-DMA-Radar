@@ -49,7 +49,7 @@ namespace LoneEftDmaRadar.UI.Skia
             try
             {
                 // 优先加载 HarmonyOS Sans 中文字体（更好的中英文混合显示效果）
-                using (var stream = Utilities.OpenResource("LoneEftDmaRadar.Resources.HarmonyOS_Sans_SC_Regular.ttf"))
+                using (var stream = Utilities.OpenResource("LoneEftDmaRadar.HarmonyOS_Sans_SC_Regular.ttf"))
                 {
                     if (stream != null)
                     {
@@ -65,7 +65,7 @@ namespace LoneEftDmaRadar.UI.Skia
                 // HarmonyOS Sans 加载失败，尝试备用字体 NeoSansStdRegular
                 try
                 {
-                    using (var stream = Utilities.OpenResource("LoneEftDmaRadar.Resources.NeoSansStdRegular.otf"))
+                    using (var stream = Utilities.OpenResource("LoneEftDmaRadar.NeoSansStdRegular.otf"))
                     {
                         if (stream != null)
                         {
